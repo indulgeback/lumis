@@ -1,7 +1,26 @@
 import { app, BrowserWindow, ipcMain, dialog } from 'electron'
 import { join } from 'path'
 import * as fs from 'fs'
+import { spawn } from 'child_process'
 import { pythonRunner, PythonEnvironment, ScriptResult } from './pythonRunner'
+
+/**
+ * frame-extractor 工具状态接口
+ */
+export interface ToolStatus {
+  installed: boolean
+  version?: string
+  error?: string
+}
+
+/**
+ * 安装结果接口
+ */
+export interface InstallResult {
+  success: boolean
+  message: string
+  error?: string
+}
 
 // 禁用 GPU 加速（可选，某些系统上可能需要）
 // app.disableHardwareAcceleration()
@@ -164,6 +183,157 @@ function registerIPCHandlers(): void {
     'python:execute',
     async (_event, scriptPath: string, args: string[]): Promise<ScriptResult> => {
       return pythonRunner.execute(scriptPath, args)
+    }
+  )
+
+  // 检查 frame-extractor 工具是否已安装
+  ipcMain.handle('tool:checkFrameExtractor', async (): Promise<ToolStatus> => {
+    return new Promise(resolve => {
+      const process = spawn('frame-extractor', ['--version'], {
+        shell: true
+      })
+
+      let stdout = ''
+      let stderr = ''
+
+      process.stdout.on('data', (data: Buffer) => {
+        stdout += data.toString()
+      })
+
+      process.stderr.on('data', (data: Buffer) => {
+        stderr += data.toString()
+      })
+
+      process.on('close', (code: number | null) => {
+        if (code === 0) {
+          // 尝试解析版本号
+          const versionMatch = (stdout || stderr).match(/(\d+\.\d+\.\d+)/)
+          resolve({
+            installed: true,
+            version: versionMatch ? versionMatch[1] : undefined
+          })
+        } else {
+          resolve({
+            installed: false,
+            error: 'frame-extractor 未安装'
+          })
+        }
+      })
+
+      process.on('error', () => {
+        resolve({
+          installed: false,
+          error: 'frame-extractor 命令不可用'
+        })
+      })
+
+      // 超时处理
+      setTimeout(() => {
+        process.kill()
+        resolve({
+          installed: false,
+          error: '检测超时'
+        })
+      }, 5000)
+    })
+  })
+
+  // 安装 frame-extractor 工具
+  ipcMain.handle('tool:installFrameExtractor', async (): Promise<InstallResult> => {
+    return new Promise(resolve => {
+      // 使用 curl 执行一键安装脚本
+      const installCmd =
+        'curl -sSL https://raw.githubusercontent.com/indulgeback/video-frame-extractor/main/install.sh | bash'
+
+      const installProcess = spawn('bash', ['-c', installCmd], {
+        shell: true
+      })
+
+      let installStderr = ''
+
+      installProcess.stdout?.on('data', (data: Buffer) => {
+        // 发送安装进度到渲染进程
+        mainWindow?.webContents.send('tool:installProgress', data.toString())
+      })
+
+      installProcess.stderr?.on('data', (data: Buffer) => {
+        installStderr += data.toString()
+        mainWindow?.webContents.send('tool:installProgress', data.toString())
+      })
+
+      installProcess.on('close', (code: number | null) => {
+        if (code === 0) {
+          resolve({
+            success: true,
+            message: 'frame-extractor 安装成功！'
+          })
+        } else {
+          resolve({
+            success: false,
+            message: '安装失败',
+            error: installStderr || '未知错误'
+          })
+        }
+      })
+
+      installProcess.on('error', (error: Error) => {
+        resolve({
+          success: false,
+          message: '安装失败',
+          error: error.message
+        })
+      })
+
+      // 安装超时（2分钟）
+      setTimeout(() => {
+        installProcess.kill()
+        resolve({
+          success: false,
+          message: '安装超时',
+          error: '安装时间过长，请检查网络连接后重试'
+        })
+      }, 120000)
+    })
+  })
+
+  // 执行 frame-extractor 命令
+  ipcMain.handle(
+    'tool:executeFrameExtractor',
+    async (_event, args: string[]): Promise<ScriptResult> => {
+      return new Promise(resolve => {
+        const execProcess = spawn('frame-extractor', args, {
+          shell: true
+        })
+
+        let execStdout = ''
+        let execStderr = ''
+
+        execProcess.stdout?.on('data', (data: Buffer) => {
+          execStdout += data.toString()
+        })
+
+        execProcess.stderr?.on('data', (data: Buffer) => {
+          execStderr += data.toString()
+        })
+
+        execProcess.on('close', (code: number | null) => {
+          resolve({
+            success: code === 0,
+            stdout: execStdout,
+            stderr: execStderr,
+            error: code !== 0 ? execStderr || '执行失败' : undefined
+          })
+        })
+
+        execProcess.on('error', (error: Error) => {
+          resolve({
+            success: false,
+            stdout: execStdout,
+            stderr: execStderr,
+            error: error.message
+          })
+        })
+      })
     }
   )
 }

@@ -65,6 +65,20 @@ interface ScriptResult {
   stderr: string
 }
 
+// 定义工具状态类型
+interface ToolStatus {
+  installed: boolean
+  version?: string
+  error?: string
+}
+
+// 定义安装结果类型
+interface InstallResult {
+  success: boolean
+  message: string
+  error?: string
+}
+
 // 暴露给渲染进程的 API
 const electronAPI = {
   // 文件选择对话框（通用）
@@ -145,6 +159,33 @@ const electronAPI = {
   // 执行 Python 脚本
   executePythonScript: (scriptPath: string, args: string[] = []): Promise<ScriptResult> => {
     return ipcRenderer.invoke('python:execute', scriptPath, args)
+  },
+
+  // 检查 frame-extractor 工具
+  checkFrameExtractor: (): Promise<ToolStatus> => {
+    return ipcRenderer.invoke('tool:checkFrameExtractor')
+  },
+
+  // 安装 frame-extractor 工具
+  installFrameExtractor: (): Promise<InstallResult> => {
+    return ipcRenderer.invoke('tool:installFrameExtractor')
+  },
+
+  // 执行 frame-extractor 命令
+  executeFrameExtractor: (args: string[]): Promise<ScriptResult> => {
+    return ipcRenderer.invoke('tool:executeFrameExtractor', args)
+  },
+
+  // 监听安装进度
+  onInstallProgress: (callback: (output: string) => void): void => {
+    ipcRenderer.on('tool:installProgress', (_event, output) => {
+      callback(output)
+    })
+  },
+
+  // 移除安装进度监听
+  removeInstallProgressListener: (): void => {
+    ipcRenderer.removeAllListeners('tool:installProgress')
   }
 }
 

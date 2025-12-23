@@ -19,16 +19,28 @@
           <v-list-item prepend-icon="mdi-image" title="图片处理" value="image" to="/image" />
         </v-list>
 
-        <!-- Python 环境状态 -->
-        <template v-if="pythonChecked">
+        <!-- 环境状态 -->
+        <template v-if="envChecked">
           <v-divider class="my-2" />
+
+          <!-- Python 状态 -->
           <v-list-item
-            :prepend-icon="pythonAvailable ? 'mdi-check-circle' : 'mdi-alert-circle'"
-            :title="pythonAvailable ? 'Python 就绪' : 'Python 未就绪'"
+            :prepend-icon="pythonAvailable ? 'mdi-language-python' : 'mdi-alert-circle'"
+            :title="pythonAvailable ? 'Python' : 'Python 未就绪'"
             :subtitle="pythonVersion || pythonError"
-            :class="pythonAvailable ? 'python-ready' : 'python-error'"
+            :class="pythonAvailable ? 'env-ready' : 'env-error'"
             density="compact"
-            @click="showPythonDialog = true"
+            @click="showEnvDialog = true"
+          />
+
+          <!-- 工具状态 -->
+          <v-list-item
+            :prepend-icon="toolInstalled ? 'mdi-package-check' : 'mdi-package-down'"
+            :title="toolInstalled ? 'frame-extractor' : '工具未安装'"
+            :subtitle="toolInstalled ? toolVersion : '点击安装'"
+            :class="toolInstalled ? 'env-ready' : 'env-warning'"
+            density="compact"
+            @click="showEnvDialog = true"
           />
         </template>
       </v-navigation-drawer>
@@ -37,47 +49,106 @@
         <router-view />
       </v-main>
 
-      <!-- Python 环境详情对话框 -->
-      <v-dialog v-model="showPythonDialog" max-width="420">
-        <v-card class="python-dialog">
-          <v-card-title class="d-flex align-center">
-            <v-icon :color="pythonAvailable ? 'success' : 'warning'" class="mr-2">
-              {{ pythonAvailable ? 'mdi-check-circle' : 'mdi-alert-circle' }}
-            </v-icon>
-            Python 环境
-          </v-card-title>
+      <!-- 环境详情对话框 -->
+      <v-dialog v-model="showEnvDialog" max-width="480">
+        <v-card>
+          <v-card-title>环境状态</v-card-title>
 
           <v-card-text>
-            <template v-if="pythonAvailable">
-              <div class="status-item">
-                <span class="label">状态</span>
-                <v-chip color="success" size="small"> 已就绪 </v-chip>
+            <!-- Python 环境 -->
+            <div class="env-section">
+              <div class="env-header">
+                <v-icon :color="pythonAvailable ? 'success' : 'warning'" class="mr-2">
+                  {{ pythonAvailable ? 'mdi-check-circle' : 'mdi-alert-circle' }}
+                </v-icon>
+                <span class="text-subtitle-1">Python 环境</span>
               </div>
-              <div class="status-item">
-                <span class="label">版本</span>
-                <span class="value">{{ pythonVersion }}</span>
-              </div>
-              <div class="status-item">
-                <span class="label">命令</span>
-                <code>{{ pythonPath }}</code>
-              </div>
-            </template>
 
-            <template v-else>
-              <v-alert type="warning" variant="tonal" class="mb-4">
-                {{ pythonError }}
-              </v-alert>
-              <p class="text-body-2 mb-2">
-                请确保已安装 Python 3.8 或更高版本，并已添加到系统 PATH。
-              </p>
-              <p class="text-body-2 text-medium-emphasis">安装完成后，请重启应用。</p>
-            </template>
+              <template v-if="pythonAvailable">
+                <div class="env-info">
+                  <span class="label">版本</span>
+                  <span>{{ pythonVersion }}</span>
+                </div>
+                <div class="env-info">
+                  <span class="label">命令</span>
+                  <code>{{ pythonPath }}</code>
+                </div>
+              </template>
+              <template v-else>
+                <v-alert type="warning" variant="tonal" density="compact" class="mt-2">
+                  {{ pythonError }}
+                </v-alert>
+              </template>
+            </div>
+
+            <v-divider class="my-4" />
+
+            <!-- frame-extractor 工具 -->
+            <div class="env-section">
+              <div class="env-header">
+                <v-icon :color="toolInstalled ? 'success' : 'warning'" class="mr-2">
+                  {{ toolInstalled ? 'mdi-check-circle' : 'mdi-package-down' }}
+                </v-icon>
+                <span class="text-subtitle-1">frame-extractor 工具</span>
+              </div>
+
+              <template v-if="toolInstalled">
+                <div class="env-info">
+                  <span class="label">状态</span>
+                  <v-chip color="success" size="small"> 已安装 </v-chip>
+                </div>
+                <div v-if="toolVersion" class="env-info">
+                  <span class="label">版本</span>
+                  <span>{{ toolVersion }}</span>
+                </div>
+              </template>
+              <template v-else>
+                <v-alert type="info" variant="tonal" density="compact" class="mt-2 mb-3">
+                  视频首帧提取和图片压缩功能需要安装此工具
+                </v-alert>
+
+                <!-- 安装进度 -->
+                <template v-if="installing">
+                  <v-progress-linear indeterminate color="primary" class="mb-2" />
+                  <div class="install-log">
+                    <pre>{{ installLog }}</pre>
+                  </div>
+                </template>
+
+                <!-- 安装按钮 -->
+                <v-btn
+                  v-if="!installing && pythonAvailable"
+                  color="primary"
+                  variant="tonal"
+                  block
+                  @click="installTool"
+                >
+                  <v-icon left> mdi-download </v-icon>
+                  一键安装
+                </v-btn>
+
+                <v-alert v-if="!pythonAvailable" type="warning" variant="tonal" density="compact">
+                  请先安装 Python 环境
+                </v-alert>
+
+                <!-- 安装结果 -->
+                <v-alert
+                  v-if="installError"
+                  type="error"
+                  variant="tonal"
+                  density="compact"
+                  class="mt-2"
+                >
+                  {{ installError }}
+                </v-alert>
+              </template>
+            </div>
           </v-card-text>
 
           <v-card-actions>
             <v-spacer />
-            <v-btn v-if="!pythonAvailable" variant="text" @click="recheckPython"> 重新检测 </v-btn>
-            <v-btn color="primary" variant="flat" @click="showPythonDialog = false"> 确定 </v-btn>
+            <v-btn variant="text" @click="recheckEnv"> 重新检测 </v-btn>
+            <v-btn color="primary" variant="tonal" @click="showEnvDialog = false"> 确定 </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -86,19 +157,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import SplashScreen from './components/common/SplashScreen.vue'
 
 const showSplash = ref(true)
 const appReady = ref(false)
 
-// Python 环境状态
-const pythonChecked = ref(false)
+// 环境状态
+const envChecked = ref(false)
+const showEnvDialog = ref(false)
+
+// Python 环境
 const pythonAvailable = ref(false)
 const pythonVersion = ref('')
 const pythonPath = ref('')
 const pythonError = ref('')
-const showPythonDialog = ref(false)
+
+// frame-extractor 工具
+const toolInstalled = ref(false)
+const toolVersion = ref('')
+
+// 安装状态
+const installing = ref(false)
+const installLog = ref('')
+const installError = ref('')
 
 const onSplashComplete = () => {
   showSplash.value = false
@@ -115,26 +197,85 @@ const checkPythonEnvironment = async () => {
       pythonPath.value = result.path || ''
       pythonError.value = result.error || ''
     } else {
-      // 非 Electron 环境（开发时浏览器预览）
       pythonAvailable.value = false
       pythonError.value = '仅在 Electron 环境中可用'
     }
-  } catch (error) {
+  } catch {
     pythonAvailable.value = false
     pythonError.value = '检测失败'
-  } finally {
-    pythonChecked.value = true
   }
 }
 
-const recheckPython = () => {
-  pythonChecked.value = false
-  checkPythonEnvironment()
+// 检查 frame-extractor 工具
+const checkFrameExtractor = async () => {
+  try {
+    if (window.electronAPI) {
+      const result = await window.electronAPI.checkFrameExtractor()
+      toolInstalled.value = result.installed
+      toolVersion.value = result.version ? `v${result.version}` : ''
+    } else {
+      toolInstalled.value = false
+    }
+  } catch {
+    toolInstalled.value = false
+  }
+}
+
+// 检查所有环境
+const checkAllEnv = async () => {
+  await checkPythonEnvironment()
+  if (pythonAvailable.value) {
+    await checkFrameExtractor()
+  }
+  envChecked.value = true
+}
+
+// 重新检测
+const recheckEnv = () => {
+  envChecked.value = false
+  installError.value = ''
+  checkAllEnv()
+}
+
+// 安装工具
+const installTool = async () => {
+  if (!window.electronAPI) return
+
+  installing.value = true
+  installLog.value = ''
+  installError.value = ''
+
+  // 监听安装进度
+  window.electronAPI.onInstallProgress((output: string) => {
+    installLog.value += output
+  })
+
+  try {
+    const result = await window.electronAPI.installFrameExtractor()
+
+    if (result.success) {
+      // 安装成功，重新检测
+      await checkFrameExtractor()
+      installLog.value += '\n✅ 安装完成！'
+    } else {
+      installError.value = result.error || result.message
+    }
+  } catch (error) {
+    installError.value = '安装过程出错'
+  } finally {
+    installing.value = false
+    window.electronAPI.removeInstallProgressListener()
+  }
 }
 
 onMounted(() => {
-  // 延迟检测，等待应用完全加载
-  setTimeout(checkPythonEnvironment, 500)
+  setTimeout(checkAllEnv, 500)
+})
+
+onUnmounted(() => {
+  if (window.electronAPI) {
+    window.electronAPI.removeInstallProgressListener()
+  }
 })
 </script>
 
@@ -153,43 +294,61 @@ body {
 </style>
 
 <style scoped>
-.python-ready :deep(.v-list-item-title) {
+.env-ready :deep(.v-list-item-title) {
   color: #66bb6a;
 }
 
-.python-error :deep(.v-list-item-title) {
+.env-error :deep(.v-list-item-title) {
+  color: #ef5350;
+}
+
+.env-warning :deep(.v-list-item-title) {
   color: #ffa726;
 }
 
-.python-dialog {
-  border-radius: 16px !important;
+.env-section {
+  margin-bottom: 8px;
 }
 
-.status-item {
+.env-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.env-info {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 6px 0;
 }
 
-.status-item:last-child {
-  border-bottom: none;
-}
-
-.status-item .label {
+.env-info .label {
   color: #888;
   font-size: 14px;
 }
 
-.status-item .value {
-  font-weight: 500;
-}
-
-.status-item code {
+.env-info code {
   background: #f5f5f5;
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 13px;
+}
+
+.install-log {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 12px;
+  border-radius: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.install-log pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 </style>
