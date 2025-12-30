@@ -1,6 +1,6 @@
 {
     "name": "lumis",
-    "version": "1.0.0",
+    "version": "1.0.0-beta.1",
     "description": "Lumis - 媒体处理桌面应用",
     "main": "dist-electron/main.js",
     "scripts": {
