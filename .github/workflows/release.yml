@@ -17,7 +17,7 @@ env:
 
 jobs:
   release:
-    name: Build macOS
+    name: Build & Release
     runs-on: macos-latest
     permissions:
       contents: write
@@ -25,8 +25,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -42,78 +40,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build & Package
-        # 移除 .git 目录，让 electron-builder 检测不到 tag，从而不触发发布逻辑
-        run: |
-          rm -rf .git
-          pnpm electron:build -- --mac
+      - name: Build & Publish
+        run: pnpm electron:build -- --mac --publish always
         env:
-          NODE_ENV: production
-
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          # 使用固定名称方便下游 Job 下载
-          name: lumis-mac-dist
-          path: release/*.dmg
-          retention-days: 7
-
-  create-github-release:
-    name: Create GitHub Release
-    needs: release
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: lumis-mac-dist
-          path: release-assets
-          # 将产物直接平铺到 release-assets 文件夹，方便后续引用
-          merge-multiple: true
-
-      - name: Generate changelog
-        id: changelog
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            VERSION="${{ github.event.inputs.version }}"
-          else
-            VERSION="${GITHUB_REF#refs/tags/}"
-          fi
-
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "## What's Changed" > release-notes.md
-
-          # 尝试获取上一个 Tag，如果没有则获取所有提交
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
-          if [ -n "$PREV_TAG" ]; then
-            echo "" >> release-notes.md
-            echo "### Changes since $PREV_TAG" >> release-notes.md
-            git log ${PREV_TAG}..HEAD --oneline --pretty="- %s" >> release-notes.md 2>/dev/null || echo "No commits found"
-          else
-            echo "" >> release-notes.md
-            echo "### Initial Release Changes" >> release-notes.md
-            git log --oneline --pretty="- %s" >> release-notes.md
-          fi
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ steps.changelog.outputs.version }}
-          name: Lumis ${{ steps.changelog.outputs.version }}
-          body_path: release-notes.md
-          draft: false
-          prerelease: true
-          # 现在的路径非常干净，直接指向下载好的文件夹内容
-          files: |
-            release-assets/*.dmg
-            release-assets/*.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
