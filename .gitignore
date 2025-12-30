@@ -17,6 +17,12 @@ dist-electron
 release
 *.local
 
+# Build resources (icons should be committed, but generated files ignored)
+build/*.icns
+build/*.ico
+# Keep icon.png in build directory
+!build/icon.png
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -6,13 +6,18 @@
     "scripts": {
         "dev": "vite",
         "build": "vue-tsc --noEmit && vite build && electron-builder",
+        "build:win": "vue-tsc --noEmit && vite build && electron-builder --win",
+        "build:mac": "vue-tsc --noEmit && vite build && electron-builder --mac",
+        "build:linux": "vue-tsc --noEmit && vite build && electron-builder --linux",
         "preview": "vite preview",
         "electron:dev": "vite --mode electron",
         "electron:build": "vite build && electron-builder",
+        "electron:build:publish": "vite build && electron-builder --publish always",
         "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
         "format": "prettier --write src/",
         "test": "vitest --run",
-        "test:watch": "vitest"
+        "test:watch": "vitest",
+        "release": "standard-version"
     },
     "dependencies": {
         "vue": "^3.4.21",
@@ -51,20 +56,82 @@
         "appId": "com.lumis.app",
         "productName": "Lumis",
         "directories": {
-            "output": "release"
+            "output": "release",
+            "buildResources": "build"
         },
         "files": [
             "dist/**/*",
-            "dist-electron/**/*"
+            "dist-electron/**/*",
+            "package.json"
         ],
+        "publish": {
+            "provider": "github",
+            "releaseType": "release"
+        },
         "mac": {
-            "target": "dmg"
+            "target": [
+                {
+                    "target": "dmg",
+                    "arch": ["x64", "arm64"]
+                },
+                {
+                    "target": "zip",
+                    "arch": ["x64", "arm64"]
+                }
+            ],
+            "category": "public.app-category.graphics-design",
+            "icon": "build/icon.icns",
+            "hardenedRuntime": true,
+            "gatekeeperAssess": false,
+            "entitlements": "build/entitlements.mac.plist",
+            "entitlementsInherit": "build/entitlements.mac.plist"
         },
         "win": {
-            "target": "nsis"
+            "target": [
+                {
+                    "target": "nsis",
+                    "arch": ["x64", "ia32"]
+                },
+                {
+                    "target": "zip",
+                    "arch": ["x64", "ia32"]
+                }
+            ],
+            "icon": "build/icon.ico"
         },
         "linux": {
-            "target": "AppImage"
+            "target": [
+                "AppImage",
+                "deb",
+                "rpm"
+            ],
+            "category": "Graphics",
+            "icon": "build/icon.png",
+            "maintainer": "Lumis",
+            "vendor": "Lumis",
+            "synopsis": "Media processing desktop application",
+            "description": "Lumis is a cross-platform media processing desktop application"
+        },
+        "nsis": {
+            "oneClick": true,
+            "allowToChangeInstallationDirectory": true,
+            "createDesktopShortcut": true,
+            "createStartMenuShortcut": true,
+            "perMachine": false
+        },
+        "dmg": {
+            "contents": [
+                {
+                    "x": 130,
+                    "y": 220
+                },
+                {
+                    "x": 410,
+                    "y": 220,
+                    "type": "link",
+                    "path": "/Applications"
+                }
+            ]
         }
     }
 }

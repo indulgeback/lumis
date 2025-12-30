@@ -1,0 +1,163 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version (e.g., v1.0.0)"
+        required: true
+        type: string
+
+env:
+  NODE_VERSION: "18"
+  PNPM_VERSION: "8.15.4"
+
+jobs:
+  release:
+    name: Build & Release
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            os_name: linux
+          - os: macos-latest
+            os_name: mac
+          - os: windows-latest
+            os_name: windows
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Python (for build tools)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Build & Package (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: pnpm electron:build -- --linux AppImage --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & Package (macOS)
+        if: matrix.os == 'macos-latest'
+        run: pnpm electron:build -- --mac --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & Package (Windows)
+        if: matrix.os == 'windows-latest'
+        run: pnpm electron:build -- --win nsis --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lumis-linux-${{ github.ref_name }}
+          path: release/*.AppImage*
+          retention-days: 30
+
+      - name: Upload artifacts (macOS)
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lumis-mac-${{ github.ref_name }}
+          path: |
+            release/*.dmg
+            release/*.dmg.blockmap
+          retention-days: 30
+
+      - name: Upload artifacts (Windows)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: lumis-windows-${{ github.ref_name }}
+          path: |
+            release/*.exe
+            release/*.exe.blockmap
+          retention-days: 30
+
+  create-github-release:
+    name: Create GitHub Release
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R artifacts
+
+      - name: Prepare release assets
+        run: |
+          mkdir -p release-assets
+          find artifacts -type f \( -name "*.AppImage*" -o -name "*.dmg*" -o -name "*.exe*" \) -exec cp {} release-assets/ \;
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/}"
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "## What's Changed" > release-notes.md
+
+          # Get commits since last tag
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            echo "" >> release-notes.md
+            echo "### Changes since $PREV_TAG" >> release-notes.md
+            git log ${PREV_TAG}..HEAD --oneline --pretty="- %s" >> release-notes.md 2>/dev/null || echo "No commits found"
+          fi
+
+          cat release-notes.md
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.changelog.outputs.version }}
+          name: Lumis ${{ steps.changelog.outputs.version }}
+          body_path: release-notes.md
+          draft: false
+          prerelease: false
+          files: release-assets/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
