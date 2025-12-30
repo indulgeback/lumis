@@ -189,52 +189,77 @@ function registerIPCHandlers(): void {
   // 检查 frame-extractor 工具是否已安装
   ipcMain.handle('tool:checkFrameExtractor', async (): Promise<ToolStatus> => {
     return new Promise(resolve => {
-      const process = spawn('frame-extractor', ['--version'], {
-        shell: true
+      // 先用 which 找到工具的完整路径
+      const whichProcess = spawn('which', ['frame-extractor'], { shell: true })
+
+      let toolPath = ''
+
+      whichProcess.stdout?.on('data', (data: Buffer) => {
+        toolPath = data.toString().trim()
       })
 
-      let stdout = ''
-      let stderr = ''
-
-      process.stdout.on('data', (data: Buffer) => {
-        stdout += data.toString()
-      })
-
-      process.stderr.on('data', (data: Buffer) => {
-        stderr += data.toString()
-      })
-
-      process.on('close', (code: number | null) => {
-        if (code === 0) {
-          // 尝试解析版本号
-          const versionMatch = (stdout || stderr).match(/(\d+\.\d+\.\d+)/)
-          resolve({
-            installed: true,
-            version: versionMatch ? versionMatch[1] : undefined
-          })
-        } else {
+      whichProcess.on('close', (code: number | null) => {
+        if (code !== 0 || !toolPath) {
           resolve({
             installed: false,
             error: 'frame-extractor 未安装'
           })
+          return
         }
+
+        // 使用找到的完整路径执行版本检查
+        const versionProcess = spawn(toolPath, ['--version'])
+
+        let stdout = ''
+        let stderr = ''
+
+        versionProcess.stdout.on('data', (data: Buffer) => {
+          stdout += data.toString()
+        })
+
+        versionProcess.stderr.on('data', (data: Buffer) => {
+          stderr += data.toString()
+        })
+
+        versionProcess.on('close', (code: number | null) => {
+          if (code === 0) {
+            // 尝试解析版本号
+            const versionMatch = (stdout || stderr).match(/(\d+\.\d+\.\d+)/)
+            resolve({
+              installed: true,
+              version: versionMatch ? versionMatch[1] : undefined
+            })
+          } else {
+            resolve({
+              installed: false,
+              error: 'frame-extractor 未安装'
+            })
+          }
+        })
+
+        versionProcess.on('error', () => {
+          resolve({
+            installed: false,
+            error: 'frame-extractor 命令不可用'
+          })
+        })
+
+        // 超时处理
+        setTimeout(() => {
+          versionProcess.kill()
+          resolve({
+            installed: false,
+            error: '检测超时'
+          })
+        }, 5000)
       })
 
-      process.on('error', () => {
+      whichProcess.on('error', () => {
         resolve({
           installed: false,
-          error: 'frame-extractor 命令不可用'
+          error: '无法查找 frame-extractor'
         })
       })
-
-      // 超时处理
-      setTimeout(() => {
-        process.kill()
-        resolve({
-          installed: false,
-          error: '检测超时'
-        })
-      }, 5000)
     })
   })
 
@@ -301,36 +326,65 @@ function registerIPCHandlers(): void {
     'tool:executeFrameExtractor',
     async (_event, args: string[]): Promise<ScriptResult> => {
       return new Promise(resolve => {
-        const execProcess = spawn('frame-extractor', args, {
-          shell: true
+        // 先用 which 找到工具的完整路径
+        const whichProcess = spawn('which', ['frame-extractor'], { shell: true })
+
+        let toolPath = ''
+
+        whichProcess.stdout?.on('data', (data: Buffer) => {
+          toolPath = data.toString().trim()
         })
 
-        let execStdout = ''
-        let execStderr = ''
+        whichProcess.on('close', (code: number | null) => {
+          if (code !== 0 || !toolPath) {
+            resolve({
+              success: false,
+              stdout: '',
+              stderr: '',
+              error: 'frame-extractor 未安装，请先安装'
+            })
+            return
+          }
 
-        execProcess.stdout?.on('data', (data: Buffer) => {
-          execStdout += data.toString()
-        })
+          // 使用找到的完整路径执行
+          const execProcess = spawn(toolPath, args)
 
-        execProcess.stderr?.on('data', (data: Buffer) => {
-          execStderr += data.toString()
-        })
+          let execStdout = ''
+          let execStderr = ''
 
-        execProcess.on('close', (code: number | null) => {
-          resolve({
-            success: code === 0,
-            stdout: execStdout,
-            stderr: execStderr,
-            error: code !== 0 ? execStderr || '执行失败' : undefined
+          execProcess.stdout?.on('data', (data: Buffer) => {
+            execStdout += data.toString()
+          })
+
+          execProcess.stderr.on('data', (data: Buffer) => {
+            execStderr += data.toString()
+          })
+
+          execProcess.on('close', (code: number | null) => {
+            resolve({
+              success: code === 0,
+              stdout: execStdout,
+              stderr: execStderr,
+              error: code !== 0 ? execStderr || '执行失败' : undefined
+            })
+          })
+
+          execProcess.on('error', (error: Error) => {
+            resolve({
+              success: false,
+              stdout: execStdout,
+              stderr: execStderr,
+              error: error.message
+            })
           })
         })
 
-        execProcess.on('error', (error: Error) => {
+        whichProcess.on('error', () => {
           resolve({
             success: false,
-            stdout: execStdout,
-            stderr: execStderr,
-            error: error.message
+            stdout: '',
+            stderr: '',
+            error: '无法查找 frame-extractor'
           })
         })
       })
