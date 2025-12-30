@@ -44,19 +44,12 @@ jobs:
 
       - name: Build & Package
         run: pnpm electron:build -- --mac --publish never
-        env:
-          # 禁用 electron-builder 自动发布
-          GH_TOKEN: ""
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: lumis-mac-${{ github.ref_name }}
-          path: |
-            release/*.dmg
-            release/*.dmg.blockmap
-            release/*.zip
-            release/*.zip.blockmap
+          path: release/*.dmg
           retention-days: 7
 
   create-github-release:
