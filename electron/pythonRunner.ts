@@ -41,22 +41,44 @@ export class PythonRunner {
    * @returns Promise<PythonEnvironment> Python 环境信息
    */
   async checkPythonEnvironment(): Promise<PythonEnvironment> {
-    // 尝试不同的 Python 命令
-    const pythonCommands = ['python3', 'python']
+    // 尝试不同的 Python 命令和路径
+    // 优先尝试常见安装路径（Homebrew、pyenv、用户安装等）
+    const pythonCommands = [
+      // macOS Homebrew (Apple Silicon)
+      '/opt/homebrew/bin/python3',
+      '/opt/homebrew/bin/python',
+      // macOS Homebrew (Intel)
+      '/usr/local/bin/python3',
+      '/usr/local/bin/python',
+      // pyenv
+      `${process.env.HOME}/.pyenv/shims/python3`,
+      `${process.env.HOME}/.pyenv/shims/python`,
+      // 用户本地 bin
+      `${process.env.HOME}/.local/bin/python3`,
+      `${process.env.HOME}/.local/bin/python`,
+      // 系统命令（通过 PATH）
+      'python3',
+      'python'
+    ]
 
+    console.log('[Python] 检测 Python 环境，尝试路径：')
     for (const cmd of pythonCommands) {
+      console.log(`[Python]   尝试: ${cmd}`)
       try {
         const result = await this.tryPythonCommand(cmd)
         if (result.available) {
           this.pythonCommand = cmd
+          console.log(`[Python] ✅ 找到: ${cmd} (版本 ${result.version})`)
           return result
         }
-      } catch {
+      } catch (err) {
+        console.log(`[Python]   失败: ${cmd} - ${(err as Error).message}`)
         // 继续尝试下一个命令
         continue
       }
     }
 
+    console.log('[Python] ❌ 未找到可用的 Python 环境')
     return {
       available: false,
       error: 'Python 环境不可用。请确保已安装 Python 3.8 或更高版本，并已添加到系统 PATH 中。'

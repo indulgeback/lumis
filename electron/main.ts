@@ -90,6 +90,41 @@ function createWindow(): void {
     mainWindow.loadFile(join(__dirname, '../dist/index.html'))
   }
 
+  // 生产环境：快捷键打开开发者工具 (Cmd+Option+I / Ctrl+Shift+I)
+  mainWindow.webContents.on('before-input-event', (_event, input) => {
+    const isDevToolsShortcut =
+      (input.key === 'i' || input.key === 'I') &&
+      (input.meta || input.ctrl) &&
+      input.alt &&
+      input.shift
+
+    if (isDevToolsShortcut) {
+      mainWindow?.webContents.toggleDevTools()
+    }
+  })
+
+  // 将主进程的 console.log 输出到文件
+  const logPath = join(app.getPath('userData'), 'logs', 'main.log')
+  fs.mkdirSync(join(app.getPath('userData'), 'logs'), { recursive: true })
+
+  const originalLog = console.log
+  const originalError = console.error
+  const logToFile = (message: string): void => {
+    const timestamp = new Date().toISOString()
+    const logMessage = `[${timestamp}] ${message}\n`
+    fs.appendFileSync(logPath, logMessage)
+  }
+
+  console.log = (...args: unknown[]) => {
+    originalLog(...args)
+    logToFile(args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' '))
+  }
+
+  console.error = (...args: unknown[]) => {
+    originalError(...args)
+    logToFile('ERROR: ' + args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' '))
+  }
+
   mainWindow.on('closed', () => {
     mainWindow = null
   })
