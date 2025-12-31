@@ -103,7 +103,7 @@ function createWindow(): void {
     }
   })
 
-  // 将主进程的 console.log 输出到文件
+  // 设置日志系统：同时输出到终端、文件和 DevTools
   const logPath = join(app.getPath('userData'), 'logs', 'main.log')
   fs.mkdirSync(join(app.getPath('userData'), 'logs'), { recursive: true })
 
@@ -115,14 +115,28 @@ function createWindow(): void {
     fs.appendFileSync(logPath, logMessage)
   }
 
+  // 发送日志到 DevTools
+  const sendToDevTools = (level: 'log' | 'error', ...args: unknown[]): void => {
+    const message = args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ')
+    mainWindow?.webContents.executeJavaScript(`
+      console.${level}('[Main Process] ${message.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}')
+    `).catch(() => {
+      // 忽略错误（DevTools 未打开时）
+    })
+  }
+
   console.log = (...args: unknown[]) => {
     originalLog(...args)
-    logToFile(args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' '))
+    const message = args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ')
+    logToFile(message)
+    sendToDevTools('log', ...args)
   }
 
   console.error = (...args: unknown[]) => {
     originalError(...args)
-    logToFile('ERROR: ' + args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' '))
+    const message = args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ')
+    logToFile('ERROR: ' + message)
+    sendToDevTools('error', ...args)
   }
 
   mainWindow.on('closed', () => {
