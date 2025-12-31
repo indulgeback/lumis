@@ -237,6 +237,7 @@ function registerIPCHandlers(): void {
 
   // 检查 frame-extractor 工具是否已安装
   ipcMain.handle('tool:checkFrameExtractor', async (): Promise<ToolStatus> => {
+    console.log('[Tool] 检测 frame-extractor 工具...')
     return new Promise(resolve => {
       // 先用 which 找到工具的完整路径
       const whichProcess = spawn('which', ['frame-extractor'], { shell: true })
@@ -249,12 +250,15 @@ function registerIPCHandlers(): void {
 
       whichProcess.on('close', (code: number | null) => {
         if (code !== 0 || !toolPath) {
+          console.log('[Tool] ❌ frame-extractor 未安装')
           resolve({
             installed: false,
             error: 'frame-extractor 未安装'
           })
           return
         }
+
+        console.log(`[Tool] 找到工具路径: ${toolPath}`)
 
         // 使用找到的完整路径执行版本检查
         const versionProcess = spawn(toolPath, ['--version'])
@@ -274,11 +278,14 @@ function registerIPCHandlers(): void {
           if (code === 0) {
             // 尝试解析版本号
             const versionMatch = (stdout || stderr).match(/(\d+\.\d+\.\d+)/)
+            const version = versionMatch ? versionMatch[1] : 'unknown'
+            console.log(`[Tool] ✅ frame-extractor 已安装 (版本 ${version})`)
             resolve({
               installed: true,
               version: versionMatch ? versionMatch[1] : undefined
             })
           } else {
+            console.log(`[Tool] ⚠️ 执行失败，退出码: ${code}`)
             resolve({
               installed: false,
               error: 'frame-extractor 未安装'
@@ -286,7 +293,8 @@ function registerIPCHandlers(): void {
           }
         })
 
-        versionProcess.on('error', () => {
+        versionProcess.on('error', (err) => {
+          console.log(`[Tool] ❌ 执行错误: ${(err as Error).message}`)
           resolve({
             installed: false,
             error: 'frame-extractor 命令不可用'
@@ -296,6 +304,7 @@ function registerIPCHandlers(): void {
         // 超时处理
         setTimeout(() => {
           versionProcess.kill()
+          console.log('[Tool] ⏱ 版本检测超时')
           resolve({
             installed: false,
             error: '检测超时'
@@ -303,7 +312,8 @@ function registerIPCHandlers(): void {
         }, 5000)
       })
 
-      whichProcess.on('error', () => {
+      whichProcess.on('error', (err) => {
+        console.log(`[Tool] ❌ which 查找失败: ${(err as Error).message}`)
         resolve({
           installed: false,
           error: '无法查找 frame-extractor'
