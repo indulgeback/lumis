@@ -94,7 +94,7 @@ function createWindow(): void {
   mainWindow.webContents.on('before-input-event', (_event, input) => {
     const isDevToolsShortcut =
       (input.key === 'i' || input.key === 'I') &&
-      (input.meta || input.ctrl) &&
+      (input.meta || input.control) &&
       input.alt &&
       input.shift
 
@@ -118,11 +118,15 @@ function createWindow(): void {
   // 发送日志到 DevTools
   const sendToDevTools = (level: 'log' | 'error', ...args: unknown[]): void => {
     const message = args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ')
-    mainWindow?.webContents.executeJavaScript(`
+    mainWindow?.webContents
+      .executeJavaScript(
+        `
       console.${level}('[Main Process] ${message.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}')
-    `).catch(() => {
-      // 忽略错误（DevTools 未打开时）
-    })
+    `
+      )
+      .catch(() => {
+        // 忽略错误（DevTools 未打开时）
+      })
   }
 
   console.log = (...args: unknown[]) => {
@@ -293,7 +297,7 @@ function registerIPCHandlers(): void {
           }
         })
 
-        versionProcess.on('error', (err) => {
+        versionProcess.on('error', err => {
           console.log(`[Tool] ❌ 执行错误: ${(err as Error).message}`)
           resolve({
             installed: false,
@@ -304,7 +308,7 @@ function registerIPCHandlers(): void {
         // 超时处理
         setTimeout(() => {
           versionProcess.kill()
-          console.log('[Tool] ⏱ 版本检测超时')
+          console.log('[Tool] ⏱ 版本检测超时自动关闭')
           resolve({
             installed: false,
             error: '检测超时'
@@ -312,7 +316,7 @@ function registerIPCHandlers(): void {
         }, 5000)
       })
 
-      whichProcess.on('error', (err) => {
+      whichProcess.on('error', err => {
         console.log(`[Tool] ❌ which 查找失败: ${(err as Error).message}`)
         resolve({
           installed: false,
