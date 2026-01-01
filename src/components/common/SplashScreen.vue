@@ -12,9 +12,9 @@
           />
         </div>
 
-        <!-- Logo 图标 -->
+        <!-- Logo 图标 - 可爱的柴犬 -->
         <div class="logo-container">
-          <v-icon size="80" color="white" class="logo-icon"> mdi-white-balance-sunny </v-icon>
+          <img src="@/assets/柴犬.svg" alt="Lumis" class="logo-image" />
         </div>
 
         <!-- 应用名称 -->
@@ -103,19 +103,22 @@ onMounted(() => {
 .logo-container {
   position: relative;
   z-index: 1;
-  width: 120px;
-  height: 120px;
+  width: 140px;
+  height: 140px;
   margin: 0 auto 24px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.25);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   animation: pulse-glow 2s ease-in-out infinite;
+  backdrop-filter: blur(10px);
 }
 
-.logo-icon {
-  animation: icon-appear 0.8s ease-out;
+.logo-image {
+  width: 100px;
+  height: 100px;
+  animation: icon-bounce 1s ease-out;
 }
 
 @keyframes pulse-glow {
@@ -128,14 +131,17 @@ onMounted(() => {
   }
 }
 
-@keyframes icon-appear {
-  from {
+@keyframes icon-bounce {
+  0% {
     opacity: 0;
-    transform: scale(0.5);
+    transform: scale(0.3) translateY(30px);
   }
-  to {
+  50% {
+    transform: scale(1.1) translateY(-5px);
+  }
+  100% {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) translateY(0);
   }
 }
 
@@ -147,14 +153,16 @@ onMounted(() => {
   margin: 0 0 8px;
   letter-spacing: 8px;
   animation: text-appear 0.8s ease-out 0.3s both;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .app-tagline {
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
   margin: 0 0 32px;
   letter-spacing: 4px;
   animation: text-appear 0.8s ease-out 0.5s both;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
 }
 
 @keyframes text-appear {

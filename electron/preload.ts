@@ -79,6 +79,34 @@ interface InstallResult {
   error?: string
 }
 
+// 定义批量压缩选项类型
+interface BatchCompressOptions {
+  inputDir: string
+  outputDir: string
+  recursive?: boolean
+  quality?: number
+  minSize?: number
+  maxSize?: number
+}
+
+// 定义批量压缩结果类型
+interface BatchCompressResult {
+  success: boolean
+  totalFiles?: number
+  successCount?: number
+  failedCount?: number
+  message: string
+  error?: string
+}
+
+// 定义压缩进度类型
+interface CompressProgress {
+  type: 'log' | 'progress' | 'complete'
+  message: string
+  current?: number
+  total?: number
+}
+
 // 暴露给渲染进程的 API
 const electronAPI = {
   // 文件选择对话框（通用）
@@ -104,6 +132,11 @@ const electronAPI = {
   // 保存图片对话框
   saveImage: (defaultPath: string): Promise<string | null> => {
     return ipcRenderer.invoke('dialog:saveImage', defaultPath)
+  },
+
+  // 选择目录对话框
+  selectDirectory: (): Promise<string | null> => {
+    return ipcRenderer.invoke('dialog:selectDirectory')
   },
 
   // 获取文件信息
@@ -137,6 +170,11 @@ const electronAPI = {
     options?: ImageOptions
   ): Promise<CompressionResult> => {
     return ipcRenderer.invoke('image:compress', inputPath, outputPath, options)
+  },
+
+  // 图片批量压缩
+  batchCompressImages: (options: BatchCompressOptions): Promise<BatchCompressResult> => {
+    return ipcRenderer.invoke('image:batchCompress', options)
   },
 
   // 监听进度更新
@@ -186,6 +224,18 @@ const electronAPI = {
   // 移除安装进度监听
   removeInstallProgressListener: (): void => {
     ipcRenderer.removeAllListeners('tool:installProgress')
+  },
+
+  // 监听批量压缩进度
+  onCompressProgress: (callback: (progress: CompressProgress) => void): void => {
+    ipcRenderer.on('compress:progress', (_event, progress) => {
+      callback(progress)
+    })
+  },
+
+  // 移除压缩进度监听
+  removeCompressProgressListener: (): void => {
+    ipcRenderer.removeAllListeners('compress:progress')
   }
 }
 

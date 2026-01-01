@@ -8,20 +8,35 @@
     @drop.prevent="onDrop"
     @click="openFileDialog"
   >
-    <v-icon :size="64" :color="isDragging ? 'primary' : 'grey'" class="mb-4">
+    <v-icon
+      :size="64"
+      :color="isDragging ? 'primary' : 'grey'"
+      class="mb-4"
+    >
       {{ isDragging ? 'mdi-file-download' : 'mdi-file-upload-outline' }}
     </v-icon>
 
     <p class="text-body-1 mb-2">
       {{ isDragging ? '释放文件' : '拖拽文件到此处' }}
     </p>
-    <p class="text-body-2 text-medium-emphasis">或点击选择文件</p>
+    <p class="text-body-2 text-medium-emphasis">
+      或点击选择文件
+    </p>
 
-    <p v-if="acceptText" class="text-caption text-medium-emphasis mt-2">
+    <p
+      v-if="acceptText"
+      class="text-caption text-medium-emphasis mt-2"
+    >
       支持格式: {{ acceptText }}
     </p>
 
-    <input ref="fileInput" type="file" :accept="accept" class="d-none" @change="onFileSelect" />
+    <input
+      ref="fileInput"
+      type="file"
+      :accept="accept"
+      class="d-none"
+      @change="onFileSelect"
+    >
   </div>
 </template>
 
