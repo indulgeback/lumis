@@ -81,6 +81,27 @@ export interface BatchCompressResult {
   error?: string
 }
 
+// 首帧提取选项接口
+export interface ExtractFirstFrameOptions {
+  inputDir: string
+  outputDir: string
+  recursive?: boolean
+  compress?: boolean
+  webpQuality?: number
+  minSize?: number
+  maxSize?: number
+}
+
+// 首帧提取结果接口
+export interface ExtractFirstFrameResult {
+  success: boolean
+  totalVideos?: number
+  successCount?: number
+  failedCount?: number
+  message: string
+  error?: string
+}
+
 export const ALL_MEDIA_FILTERS: Electron.FileFilter[] = [
   {
     name: '所有媒体文件',
@@ -528,6 +549,120 @@ export function registerIPCHandlers(mainWindow: BrowserWindow): void {
       })
     }
   )
+
+  // 批量提取视频首帧
+  ipcMain.handle(
+    'video:extractFirstFrame',
+    async (_event, options: ExtractFirstFrameOptions): Promise<ExtractFirstFrameResult> => {
+      console.log('[ExtractFirstFrame] 开始批量提取首帧:', options)
+
+      // 查找工具路径
+      const toolPaths = [`${process.env.HOME}/.local/bin/frame-extractor`, 'frame-extractor']
+
+      // 找到可用的工具
+      let toolPath: string | null = null
+      for (const path of toolPaths) {
+        try {
+          const checkResult = await tryToolPath(path)
+          if (checkResult.installed) {
+            toolPath = path
+            break
+          }
+        } catch {
+          continue
+        }
+      }
+
+      if (!toolPath) {
+        return {
+          success: false,
+          message: '首帧提取失败',
+          error: 'frame-extractor 未安装，请先安装'
+        }
+      }
+
+      // 构建命令参数: frame-extractor dirfirst -i input_dir -o output_dir -r -c --min-size X --max-size Y
+      const args = ['dirfirst', '-i', options.inputDir, '-o', options.outputDir]
+
+      if (options.recursive) {
+        args.push('-r')
+      }
+
+      if (options.compress) {
+        args.push('-c')
+      }
+
+      if (options.webpQuality !== undefined) {
+        args.push('--webp-quality', String(options.webpQuality))
+      }
+
+      if (options.minSize !== undefined) {
+        args.push('--min-size', String(options.minSize))
+      }
+
+      if (options.maxSize !== undefined) {
+        args.push('--max-size', String(options.maxSize))
+      }
+
+      console.log('[ExtractFirstFrame] 执行命令:', toolPath, args.join(' '))
+
+      return new Promise(resolve => {
+        const extractProcess = spawn(toolPath, args)
+        let stdout = ''
+        let stderr = ''
+
+        extractProcess.stdout?.on('data', (data: Buffer) => {
+          const output = data.toString()
+          stdout += output
+          console.log('[ExtractFirstFrame] ' + output.trim())
+          // 发送进度到渲染进程
+          mainWindow?.webContents.send('extract:progress', {
+            type: 'log',
+            message: output
+          })
+        })
+
+        extractProcess.stderr?.on('data', (data: Buffer) => {
+          const output = data.toString()
+          stderr += output
+          console.log('[ExtractFirstFrame] ' + output.trim())
+          mainWindow?.webContents.send('extract:progress', {
+            type: 'log',
+            message: output
+          })
+        })
+
+        extractProcess.on('close', (code: number | null) => {
+          if (code === 0) {
+            // 解析输出获取统计信息
+            const stats = parseExtractOutput(stdout)
+            console.log('[ExtractFirstFrame] ✅ 完成:', stats)
+            resolve({
+              success: true,
+              ...stats,
+              message: '首帧提取完成'
+            })
+          } else {
+            console.log('[ExtractFirstFrame] ❌ 失败:', stderr)
+            resolve({
+              success: false,
+              message: '首帧提取失败',
+              error: stderr || '未知错误'
+            })
+          }
+        })
+
+        extractProcess.on('error', (error: Error) => {
+          console.log('[ExtractFirstFrame] ❌ 错误:', error.message)
+          resolve({
+            success: false,
+            message: '首帧提取失败',
+            error: error.message
+          })
+        })
+      })
+    }
+  )
 }
 
 /**
@@ -545,6 +680,24 @@ function parseCompressOutput(output: string): Partial<BatchCompressResult> {
   return {
     totalFiles,
     successCount: hasErrors ? undefined : totalFiles,
+    failedCount: hasErrors ? 0 : undefined
+  }
+}
+
+/**
+ * 解析首帧提取输出，提取统计信息
+ */
+function parseExtractOutput(output: string): Partial<ExtractFirstFrameResult> {
+  // 尝试从输出中提取视频数量信息
+  const totalMatch = output.match(/(\d+)\s*(videos?|files?)/i)
+  const totalVideos = totalMatch ? parseInt(totalMatch[1], 10) : 0
+
+  // 检查是否有错误信息
+  const hasErrors = output.toLowerCase().includes('error') || output.toLowerCase().includes('failed')
+
+  return {
+    totalVideos,
+    successCount: hasErrors ? undefined : totalVideos,
     failedCount: hasErrors ? 0 : undefined
   }
 }

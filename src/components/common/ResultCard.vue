@@ -1,31 +1,15 @@
 <template>
-  <v-card
-    class="result-card"
-    :color="cardColor"
-    variant="tonal"
-  >
+  <v-card class="result-card" :color="cardColor" variant="tonal">
     <v-card-text>
       <div class="d-flex align-center mb-3">
-        <v-icon
-          :color="iconColor"
-          size="24"
-          class="mr-2"
-        >
-          {{ statusIcon }}
-        </v-icon>
+        <v-icon :icon="statusIcon" :color="iconColor" size="24" class="mr-2" />
         <span class="text-subtitle-1 font-weight-medium">{{ title }}</span>
       </div>
 
       <v-divider class="mb-3" />
 
-      <div
-        v-if="success"
-        class="result-details"
-      >
-        <div
-          v-if="originalSize !== undefined && compressedSize !== undefined"
-          class="mb-3"
-        >
+      <div v-if="success" class="result-details">
+        <div v-if="originalSize !== undefined && compressedSize !== undefined" class="mb-3">
           <div class="d-flex justify-space-between mb-1">
             <span class="text-body-2 text-medium-emphasis">原始大小</span>
             <span class="text-body-2">{{ formatSize(originalSize) }}</span>
@@ -42,10 +26,7 @@
           </div>
         </div>
 
-        <div
-          v-if="outputPath"
-          class="output-path"
-        >
+        <div v-if="outputPath" class="output-path">
           <span class="text-body-2 text-medium-emphasis">输出路径</span>
           <p class="text-body-2 mb-0 text-truncate">
             {{ outputPath }}
@@ -55,10 +36,7 @@
         <slot name="preview" />
       </div>
 
-      <div
-        v-else
-        class="error-details"
-      >
+      <div v-else class="error-details">
         <p class="text-body-2 mb-0">
           {{ errorMessage }}
         </p>

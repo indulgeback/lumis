@@ -99,6 +99,27 @@ interface BatchCompressResult {
   error?: string
 }
 
+// 定义首帧提取选项类型
+interface ExtractFirstFrameOptions {
+  inputDir: string
+  outputDir: string
+  recursive?: boolean
+  compress?: boolean
+  webpQuality?: number
+  minSize?: number
+  maxSize?: number
+}
+
+// 定义首帧提取结果类型
+interface ExtractFirstFrameResult {
+  success: boolean
+  totalVideos?: number
+  successCount?: number
+  failedCount?: number
+  message: string
+  error?: string
+}
+
 // 定义压缩进度类型
 interface CompressProgress {
   type: 'log' | 'progress' | 'complete'
@@ -177,6 +198,11 @@ const electronAPI = {
     return ipcRenderer.invoke('image:batchCompress', options)
   },
 
+  // 批量提取视频首帧
+  extractFirstFrames: (options: ExtractFirstFrameOptions): Promise<ExtractFirstFrameResult> => {
+    return ipcRenderer.invoke('video:extractFirstFrame', options)
+  },
+
   // 监听进度更新
   onProgress: (callback: (progress: number) => void): void => {
     ipcRenderer.on('progress:update', (_event, progress) => {
@@ -236,6 +262,18 @@ const electronAPI = {
   // 移除压缩进度监听
   removeCompressProgressListener: (): void => {
     ipcRenderer.removeAllListeners('compress:progress')
+  },
+
+  // 监听首帧提取进度
+  onExtractProgress: (callback: (progress: CompressProgress) => void): void => {
+    ipcRenderer.on('extract:progress', (_event, progress) => {
+      callback(progress)
+    })
+  },
+
+  // 移除首帧提取进度监听
+  removeExtractProgressListener: (): void => {
+    ipcRenderer.removeAllListeners('extract:progress')
   }
 }
 

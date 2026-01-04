@@ -2,303 +2,209 @@
   <v-container class="image-container">
     <!-- 页面头部 -->
     <div class="page-header">
-      <img
-        src="@/assets/布偶猫.svg"
-        alt=""
-        class="page-pet"
-      >
+      <img src="@/assets/布偶猫.svg" alt="" class="page-pet" />
       <div class="header-text">
-        <h1 class="page-title">
-          图片处理
-        </h1>
-        <p class="page-subtitle">
-          高效压缩图片，节省存储空间
-        </p>
+        <h1 class="page-title">图片处理</h1>
+        <p class="page-subtitle">高效压缩图片，节省存储空间</p>
       </div>
     </div>
 
     <!-- 批量压缩卡片 -->
-    <v-card class="compress-card" elevation="2">
-      <v-card-item>
-        <div class="card-header">
-          <div
-            class="card-icon-wrapper"
-            style="background: linear-gradient(135deg, #f3e5f5, #e1bee7)"
-          >
-            <v-icon
-              size="28"
-              color="#ab47bc"
-            >
-              mdi-folder-multiple-image
-            </v-icon>
+    <CollapsibleCard
+      title="批量图片压缩"
+      subtitle="将图片转换为 WebP 格式并压缩"
+      icon="mdi-folder-multiple-image"
+      icon-color="#ab47bc"
+      icon-background="linear-gradient(135deg, #f3e5f5, #e1bee7)"
+    >
+      <!-- 目录选择区域 -->
+      <v-row class="mb-4">
+        <v-col cols="12">
+          <div class="label-row">
+            <v-icon icon="mdi-folder-open" color="#f5a623" size="small" class="mr-1" />
+            <span class="field-label">输入目录</span>
           </div>
-          <div class="card-title-group">
-            <h3 class="card-title">批量图片压缩</h3>
-            <p class="card-subtitle">将图片转换为 WebP 格式并压缩</p>
+          <div class="path-display">
+            <span class="path-text">{{ inputDir || '未选择' }}</span>
+            <v-btn variant="tonal" color="primary" size="small" @click="selectInputDir">
+              <v-icon icon="mdi-folder-outline" left />
+              选择目录
+            </v-btn>
+          </div>
+        </v-col>
+
+        <v-col cols="12">
+          <div class="label-row">
+            <v-icon icon="mdi-folder-move" color="#f5a623" size="small" class="mr-1" />
+            <span class="field-label">输出目录</span>
+          </div>
+          <div class="path-display">
+            <span class="path-text">{{ outputDir || '未选择' }}</span>
+            <v-btn variant="tonal" color="primary" size="small" @click="selectOutputDir">
+              <v-icon icon="mdi-folder-outline" left />
+              选择目录
+            </v-btn>
+          </div>
+        </v-col>
+      </v-row>
+
+      <!-- 压缩选项 -->
+      <v-row class="mb-4">
+        <v-col cols="12">
+          <div class="label-row mb-2">
+            <v-icon icon="mdi-tune" color="#f5a623" size="small" class="mr-1" />
+            <span class="field-label">压缩选项</span>
+          </div>
+
+          <!-- 递归处理 -->
+          <v-checkbox
+            v-model="recursive"
+            label="递归处理子目录"
+            color="primary"
+            density="compact"
+            hide-details
+            class="mb-2"
+          >
+            <template #append>
+              <v-tooltip location="top" text="勾选后将会处理输入目录及其所有子目录中的图片">
+                <template #activator="{ props }">
+                  <v-icon
+                    icon="mdi-help-circle-outline"
+                    v-bind="props"
+                    size="small"
+                    color="grey"
+                  />
+                </template>
+              </v-tooltip>
+            </template>
+          </v-checkbox>
+
+          <!-- 文件大小控制 -->
+          <div class="size-control">
+            <div class="size-slider-group">
+              <div class="size-label">
+                <span>最小文件大小</span>
+                <v-chip size="small" color="primary" variant="tonal"> {{ minSize }} KB </v-chip>
+              </div>
+              <v-slider
+                v-model="minSize"
+                :min="10"
+                :max="200"
+                :step="5"
+                color="primary"
+                track-color="grey-lighten-2"
+                hide-details
+                class="size-slider"
+              >
+                <template #prepend>
+                  <v-btn
+                    icon
+                    size="x-small"
+                    variant="text"
+                    @click="minSize = Math.max(10, minSize - 5)"
+                  >
+                    <v-icon icon="mdi-minus" />
+                  </v-btn>
+                </template>
+                <template #append>
+                  <v-btn
+                    icon
+                    size="x-small"
+                    variant="text"
+                    @click="minSize = Math.min(200, minSize + 5)"
+                  >
+                    <v-icon icon="mdi-plus" />
+                  </v-btn>
+                </template>
+              </v-slider>
+            </div>
+
+            <div class="size-slider-group">
+              <div class="size-label">
+                <span>最大文件大小</span>
+                <v-chip size="small" color="secondary" variant="tonal"> {{ maxSize }} KB </v-chip>
+              </div>
+              <v-slider
+                v-model="maxSize"
+                :min="50"
+                :max="500"
+                :step="10"
+                color="secondary"
+                track-color="grey-lighten-2"
+                hide-details
+                class="size-slider"
+              >
+                <template #prepend>
+                  <v-btn
+                    icon
+                    size="x-small"
+                    variant="text"
+                    @click="maxSize = Math.max(50, maxSize - 10)"
+                  >
+                    <v-icon icon="mdi-minus" />
+                  </v-btn>
+                </template>
+                <template #append>
+                  <v-btn
+                    icon
+                    size="x-small"
+                    variant="text"
+                    @click="maxSize = Math.min(500, maxSize + 10)"
+                  >
+                    <v-icon icon="mdi-plus" />
+                  </v-btn>
+                </template>
+              </v-slider>
+            </div>
+          </div>
+
+          <v-alert
+            v-if="minSize >= maxSize"
+            type="warning"
+            variant="tonal"
+            density="compact"
+            class="mt-2"
+          >
+            最小值应小于最大值
+          </v-alert>
+        </v-col>
+      </v-row>
+
+      <!-- 进度显示 -->
+      <template v-if="compressing || compressLog">
+        <v-divider class="mb-4" />
+        <div class="progress-section">
+          <div class="progress-header">
+            <span class="progress-title">处理进度</span>
+            <v-chip v-if="compressing" size="small" color="info">
+              <v-icon icon="mdi-loading" start size="small" />
+              处理中
+            </v-chip>
+            <v-chip
+              v-else-if="compressResult"
+              :color="compressResult.success ? 'success' : 'error'"
+              size="small"
+            >
+              <v-icon
+                :icon="compressResult.success ? 'mdi-check' : 'mdi-alert'"
+                start
+                size="small"
+              />
+              {{ compressResult.success ? '完成' : '失败' }}
+            </v-chip>
+          </div>
+
+          <v-progress-linear v-if="compressing" indeterminate color="primary" class="mb-3" />
+
+          <div class="compress-log">
+            <pre>{{ compressLog }}</pre>
           </div>
         </div>
-      </v-card-item>
+      </template>
 
-      <v-divider />
-
-      <v-card-text class="pa-4">
-        <!-- 目录选择区域 -->
-        <v-row class="mb-4">
-          <v-col cols="12">
-            <div class="label-row">
-              <v-icon
-                color="#f5a623"
-                size="small"
-                class="mr-1"
-              >
-                mdi-folder-open
-              </v-icon>
-              <span class="field-label">输入目录</span>
-            </div>
-            <div class="path-display">
-              <span class="path-text">{{ inputDir || '未选择' }}</span>
-              <v-btn
-                variant="tonal"
-                color="primary"
-                size="small"
-                @click="selectInputDir"
-              >
-                <v-icon left>mdi-folder-outline</v-icon>
-                选择目录
-              </v-btn>
-            </div>
-          </v-col>
-
-          <v-col cols="12">
-            <div class="label-row">
-              <v-icon
-                color="#f5a623"
-                size="small"
-                class="mr-1"
-              >
-                mdi-folder-move
-              </v-icon>
-              <span class="field-label">输出目录</span>
-            </div>
-            <div class="path-display">
-              <span class="path-text">{{ outputDir || '未选择' }}</span>
-              <v-btn
-                variant="tonal"
-                color="primary"
-                size="small"
-                @click="selectOutputDir"
-              >
-                <v-icon left>mdi-folder-outline</v-icon>
-                选择目录
-              </v-btn>
-            </div>
-          </v-col>
-        </v-row>
-
-        <!-- 压缩选项 -->
-        <v-row class="mb-4">
-          <v-col cols="12">
-            <div class="label-row mb-2">
-              <v-icon
-                color="#f5a623"
-                size="small"
-                class="mr-1"
-              >
-                mdi-tune
-              </v-icon>
-              <span class="field-label">压缩选项</span>
-            </div>
-
-            <!-- 递归处理 -->
-            <v-checkbox
-              v-model="recursive"
-              label="递归处理子目录"
-              color="primary"
-              density="compact"
-              hide-details
-              class="mb-2"
-            >
-              <template #append>
-                <v-tooltip
-                  location="top"
-                  text="勾选后将会处理输入目录及其所有子目录中的图片"
-                >
-                  <template #activator="{ props }">
-                    <v-icon
-                      v-bind="props"
-                      size="small"
-                      color="grey"
-                    >
-                      mdi-help-circle-outline
-                    </v-icon>
-                  </template>
-                </v-tooltip>
-              </template>
-            </v-checkbox>
-
-            <!-- 文件大小控制 -->
-            <div class="size-control">
-              <div class="size-slider-group">
-                <div class="size-label">
-                  <span>最小文件大小</span>
-                  <v-chip
-                    size="small"
-                    color="primary"
-                    variant="tonal"
-                  >
-                    {{ minSize }} KB
-                  </v-chip>
-                </div>
-                <v-slider
-                  v-model="minSize"
-                  :min="10"
-                  :max="200"
-                  :step="5"
-                  color="primary"
-                  track-color="grey-lighten-2"
-                  hide-details
-                  class="size-slider"
-                >
-                  <template #prepend>
-                    <v-btn
-                      icon
-                      size="x-small"
-                      variant="text"
-                      @click="minSize = Math.max(10, minSize - 5)"
-                    >
-                      <v-icon>mdi-minus</v-icon>
-                    </v-btn>
-                  </template>
-                  <template #append>
-                    <v-btn
-                      icon
-                      size="x-small"
-                      variant="text"
-                      @click="minSize = Math.min(200, minSize + 5)"
-                    >
-                      <v-icon>mdi-plus</v-icon>
-                    </v-btn>
-                  </template>
-                </v-slider>
-              </div>
-
-              <div class="size-slider-group">
-                <div class="size-label">
-                  <span>最大文件大小</span>
-                  <v-chip
-                    size="small"
-                    color="secondary"
-                    variant="tonal"
-                  >
-                    {{ maxSize }} KB
-                  </v-chip>
-                </div>
-                <v-slider
-                  v-model="maxSize"
-                  :min="50"
-                  :max="500"
-                  :step="10"
-                  color="secondary"
-                  track-color="grey-lighten-2"
-                  hide-details
-                  class="size-slider"
-                >
-                  <template #prepend>
-                    <v-btn
-                      icon
-                      size="x-small"
-                      variant="text"
-                      @click="maxSize = Math.max(50, maxSize - 10)"
-                    >
-                      <v-icon>mdi-minus</v-icon>
-                    </v-btn>
-                  </template>
-                  <template #append>
-                    <v-btn
-                      icon
-                      size="x-small"
-                      variant="text"
-                      @click="maxSize = Math.min(500, maxSize + 10)"
-                    >
-                      <v-icon>mdi-plus</v-icon>
-                    </v-btn>
-                  </template>
-                </v-slider>
-              </div>
-            </div>
-
-            <v-alert
-              v-if="minSize >= maxSize"
-              type="warning"
-              variant="tonal"
-              density="compact"
-              class="mt-2"
-            >
-              最小值应小于最大值
-            </v-alert>
-          </v-col>
-        </v-row>
-
-        <!-- 进度显示 -->
-        <template v-if="compressing || compressLog">
-          <v-divider class="mb-4" />
-          <div class="progress-section">
-            <div class="progress-header">
-              <span class="progress-title">处理进度</span>
-              <v-chip
-                v-if="compressing"
-                size="small"
-                color="info"
-              >
-                <v-icon
-                  start
-                  size="small"
-                >
-                  mdi-loading
-                </v-icon>
-                处理中
-              </v-chip>
-              <v-chip
-                v-else-if="compressResult"
-                :color="compressResult.success ? 'success' : 'error'"
-                size="small"
-              >
-                <v-icon
-                  start
-                  size="small"
-                >
-                  {{ compressResult.success ? 'mdi-check' : 'mdi-alert' }}
-                </v-icon>
-                {{ compressResult.success ? '完成' : '失败' }}
-              </v-chip>
-            </div>
-
-            <v-progress-linear
-              v-if="compressing"
-              indeterminate
-              color="primary"
-              class="mb-3"
-            />
-
-            <div class="compress-log">
-              <pre>{{ compressLog }}</pre>
-            </div>
-          </div>
-        </template>
-
-      </v-card-text>
-
-      <v-divider />
-
-      <v-card-actions class="pa-4">
+      <template #actions>
         <v-spacer />
-        <v-btn
-          v-if="compressResult"
-          variant="text"
-          @click="resetForm"
-        >
-          重置
-        </v-btn>
+        <v-btn v-if="compressResult" variant="text" @click="resetForm"> 重置 </v-btn>
         <v-btn
           color="primary"
           variant="tonal"
@@ -306,21 +212,14 @@
           :loading="compressing"
           @click="startCompress"
         >
-          <v-icon start>
-            mdi-compress
-          </v-icon>
+          <v-icon icon="mdi-image-auto-adjust" left />
           开始压缩
         </v-btn>
-      </v-card-actions>
-    </v-card>
+      </template>
+    </CollapsibleCard>
 
     <!-- 支持格式说明 -->
-    <v-alert
-      type="info"
-      variant="tonal"
-      class="mt-4"
-      density="compact"
-    >
+    <v-alert type="info" variant="tonal" class="mt-4" density="compact">
       <div class="alert-content">
         <span class="alert-title">支持格式：</span>
         <span>JPG、PNG、GIF、BMP、WebP、TIFF → WebP</span>
@@ -333,17 +232,14 @@
 
     <!-- 底部装饰 -->
     <div class="footer-decoration">
-      <img
-        src="@/assets/三花猫.svg"
-        alt=""
-        class="footer-pet"
-      >
+      <img src="@/assets/三花猫.svg" alt="" class="footer-pet" />
     </div>
   </v-container>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onUnmounted } from 'vue'
+import CollapsibleCard from '@/components/common/CollapsibleCard.vue'
 
 // 状态
 const inputDir = ref('')
@@ -358,12 +254,7 @@ const compressResult = ref<any>(null)
 
 // 检查是否可以开始压缩
 const canCompress = computed(() => {
-  return (
-    inputDir.value &&
-    outputDir.value &&
-    minSize.value < maxSize.value &&
-    !compressing.value
-  )
+  return inputDir.value && outputDir.value && minSize.value < maxSize.value && !compressing.value
 })
 
 // 选择输入目录
@@ -397,7 +288,7 @@ const startCompress = async () => {
   compressResult.value = null
 
   // 监听进度
-  window.electronAPI.onCompressProgress((progress) => {
+  window.electronAPI.onCompressProgress(progress => {
     compressLog.value += progress.message + '\n'
   })
 
@@ -479,44 +370,6 @@ onUnmounted(() => {
   font-size: 14px;
   color: #888;
   margin: 4px 0 0;
-}
-
-/* 压缩卡片 */
-.compress-card {
-  border-radius: 16px;
-  overflow: hidden;
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.card-icon-wrapper {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.card-title-group {
-  flex: 1;
-}
-
-.card-title {
-  font-size: 18px;
-  font-weight: 500;
-  margin: 0 0 4px;
-}
-
-.card-subtitle {
-  font-size: 13px;
-  color: #888;
-  margin: 0;
 }
 
 /* 字段标签 */
