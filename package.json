@@ -77,10 +77,8 @@
             ],
             "category": "public.app-category.graphics-design",
             "icon": "build/icon.icns",
-            "hardenedRuntime": true,
-            "gatekeeperAssess": false,
-            "entitlements": "build/entitlements.mac.plist",
-            "entitlementsInherit": "build/entitlements.mac.plist"
+            "hardenedRuntime": false,
+            "gatekeeperAssess": false
         },
         "win": {
             "target": [
