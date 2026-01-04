@@ -2,6 +2,9 @@
     "name": "lumis",
     "version": "1.0.0-beta.3",
     "description": "Lumis - 媒体处理桌面应用",
+    "author": {
+        "name": "LeviLiu"
+    },
     "main": "dist-electron/main.js",
     "scripts": {
         "dev": "vite",
@@ -65,8 +68,7 @@
             "package.json"
         ],
         "publish": {
-            "provider": "github",
-            "releaseType": "release"
+            "provider": "github"
         },
         "mac": {
             "target": [
