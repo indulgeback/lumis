@@ -116,13 +116,19 @@
             "contents": [
                 {
                     "x": 130,
-                    "y": 220
+                    "y": 180
                 },
                 {
                     "x": 410,
-                    "y": 220,
+                    "y": 180,
                     "type": "link",
                     "path": "/Applications"
+                },
+                {
+                    "x": 130,
+                    "y": 280,
+                    "type": "file",
+                    "path": "build/MACOS_README.txt"
                 }
             ]
         }

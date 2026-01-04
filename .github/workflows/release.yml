@@ -43,6 +43,6 @@ jobs:
       - name: Build & Publish
         run: |
           pnpm vite build
-          pnpm electron-builder --mac --publish always
+          pnpm electron-builder --mac --publish always --config.releaseType=release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
