@@ -23,33 +23,35 @@
         "release": "standard-version"
     },
     "dependencies": {
+        "@mdi/font": "^7.4.47",
+        "pinia": "^2.1.7",
         "vue": "^3.4.21",
         "vue-router": "^4.3.0",
-        "pinia": "^2.1.7",
-        "vuetify": "^3.5.8",
-        "@mdi/font": "^7.4.47"
+        "vuetify": "^3.5.8"
     },
     "devDependencies": {
+        "@types/node": "^20.11.28",
+        "@typescript-eslint/eslint-plugin": "^7.2.0",
+        "@typescript-eslint/parser": "^7.2.0",
         "@vitejs/plugin-vue": "^5.0.4",
+        "@vue/test-utils": "^2.4.5",
+        "electron": "^29.1.4",
+        "electron-builder": "^24.13.3",
+        "eslint": "^8.57.0",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.4",
+        "eslint-plugin-vue": "^9.23.0",
+        "fast-check": "^3.17.0",
+        "jsdom": "^24.0.0",
+        "prettier": "^3.2.5",
+        "sass": "^1.72.0",
+        "typescript": "^5.4.2",
         "vite": "^5.2.0",
         "vite-plugin-electron": "^0.28.4",
         "vite-plugin-electron-renderer": "^0.14.5",
         "vite-plugin-vuetify": "^2.0.3",
-        "electron": "^29.1.4",
-        "electron-builder": "^24.13.3",
-        "typescript": "^5.4.2",
-        "vue-tsc": "^2.0.6",
-        "@types/node": "^20.11.28",
         "vitest": "^1.4.0",
-        "fast-check": "^3.17.0",
-        "@vue/test-utils": "^2.4.5",
-        "jsdom": "^24.0.0",
-        "eslint": "^8.57.0",
-        "eslint-plugin-vue": "^9.23.0",
-        "@typescript-eslint/eslint-plugin": "^7.2.0",
-        "@typescript-eslint/parser": "^7.2.0",
-        "prettier": "^3.2.5",
-        "sass": "^1.72.0"
+        "vue-tsc": "^2.0.6"
     },
     "packageManager": "pnpm@8.15.4",
     "engines": {
@@ -74,7 +76,10 @@
             "target": [
                 {
                     "target": "dmg",
-                    "arch": ["x64", "arm64"]
+                    "arch": [
+                        "x64",
+                        "arm64"
+                    ]
                 }
             ],
             "category": "public.app-category.graphics-design",
@@ -85,11 +90,17 @@
             "target": [
                 {
                     "target": "nsis",
-                    "arch": ["x64", "ia32"]
+                    "arch": [
+                        "x64",
+                        "ia32"
+                    ]
                 },
                 {
                     "target": "zip",
-                    "arch": ["x64", "ia32"]
+                    "arch": [
+                        "x64",
+                        "ia32"
+                    ]
                 }
             ],
             "icon": "build/icon.ico"

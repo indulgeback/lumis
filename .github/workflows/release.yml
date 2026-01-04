@@ -3,17 +3,17 @@ name: Release
 on:
   push:
     tags:
-      - "v*.*.*"
+      - 'v*.*.*'
   workflow_dispatch:
     inputs:
       version:
-        description: "Release version (e.g., v1.0.0)"
+        description: 'Release version (e.g., v1.0.0)'
         required: true
         type: string
 
 env:
-  NODE_VERSION: "18"
-  PNPM_VERSION: "8.15.4"
+  NODE_VERSION: '18'
+  PNPM_VERSION: '8.15.4'
 
 jobs:
   release:
@@ -35,7 +35,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "pnpm"
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -43,6 +43,6 @@ jobs:
       - name: Build & Publish
         run: |
           pnpm vite build
-          pnpm electron-builder --mac --publish always --config.releaseType=release
+          pnpm electron-builder --mac --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
