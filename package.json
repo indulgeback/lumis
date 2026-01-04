@@ -77,8 +77,7 @@
             ],
             "category": "public.app-category.graphics-design",
             "icon": "build/icon.icns",
-            "hardenedRuntime": false,
-            "gatekeeperAssess": false
+            "sign": null
         },
         "win": {
             "target": [
