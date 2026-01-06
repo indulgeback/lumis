@@ -1,5 +1,8 @@
 <template>
   <v-app>
+    <!-- 窗口拖动条 -->
+    <div class="titlebar-drag-area" />
+
     <!-- 启动动画 -->
     <SplashScreen v-if="showSplash" @complete="onSplashComplete" />
 
@@ -319,6 +322,18 @@ body {
 * {
   scrollbar-width: none;
 }
+
+/* 窗口拖动条 */
+.titlebar-drag-area {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  -webkit-app-region: drag;
+  z-index: 9999;
+  pointer-events: none;
+}
 </style>
 
 <style scoped>
@@ -358,6 +373,8 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
+  /* 让该区域可拖动窗口 */
+  -webkit-app-region: drag;
 }
 
 .drawer-logo {

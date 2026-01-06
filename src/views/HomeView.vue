@@ -95,14 +95,14 @@ const features = [
 // 欢迎区域
 .welcome-section {
   text-align: center;
-  padding: $spacing-3xl $spacing-lg;
+  padding: $spacing-xl $spacing-lg;
 }
 
 .welcome-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: $spacing-lg;
+  gap: $spacing-md;
 }
 
 .welcome-pet {
@@ -112,10 +112,13 @@ const features = [
   @include scale-in-animation(0.8s);
 
   // 添加悬浮动画
-  animation: scaleIn 0.8s $ease-bounce both, float 4s ease-in-out 1s infinite;
+  animation:
+    scaleIn 0.8s $ease-bounce both,
+    float 4s ease-in-out 1s infinite;
 
   @keyframes float {
-    0%, 100% {
+    0%,
+    100% {
       transform: translateY(0);
     }
     50% {
@@ -148,7 +151,7 @@ const features = [
 
 // 功能卡片区域
 .feature-section {
-  padding: $spacing-xl $spacing-lg;
+  padding: $spacing-sm;
 }
 
 .feature-card {
@@ -254,7 +257,7 @@ const features = [
 // 底部区域
 .footer-section {
   text-align: center;
-  padding: $spacing-3xl $spacing-lg;
+  padding: $spacing-xl $spacing-lg;
   @include fade-in-animation(0.6s, 0.7s);
 }
 

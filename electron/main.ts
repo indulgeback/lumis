@@ -23,7 +23,7 @@ function createWindow(): void {
       sandbox: false
     },
     show: false,
-    titleBarStyle: 'default'
+    titleBarStyle: 'hidden'
   })
 
   // 窗口准备好后显示，避免白屏
