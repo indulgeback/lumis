@@ -98,14 +98,37 @@ const formatSize = (bytes: number): string => {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .result-card {
-  border-radius: 12px;
+  @include glass-card;
+
+  // 覆盖 Vuetify 的默认背景色
+  :deep(.v-card),
+  &.v-card {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    box-shadow:
+      0 4px 30px rgba(0, 0, 0, 0.1),
+      0 1px 3px rgba(0, 0, 0, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+  }
+
+  border-radius: $radius-md;
+
+  // 文字可读性增强
+  :deep(.v-card-text),
+  :deep(.v-card-title) {
+    @include text-on-glass;
+  }
 }
 
 .output-path {
-  background-color: rgba(0, 0, 0, 0.05);
+  background: rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: $radius-sm;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 </style>

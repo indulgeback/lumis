@@ -120,6 +120,26 @@ interface ExtractFirstFrameResult {
   error?: string
 }
 
+// 定义视频压缩选项类型
+interface VideoCompressOptions {
+  inputPath: string
+  outputPath: string
+  recursive?: boolean
+  quality?: number
+  preset?: string
+  workers?: number
+}
+
+// 定义视频压缩结果类型
+interface VideoCompressResult {
+  success: boolean
+  totalVideos?: number
+  successCount?: number
+  failedCount?: number
+  message: string
+  error?: string
+}
+
 // 定义压缩进度类型
 interface CompressProgress {
   type: 'log' | 'progress' | 'complete'
@@ -203,6 +223,11 @@ const electronAPI = {
     return ipcRenderer.invoke('video:extractFirstFrame', options)
   },
 
+  // 视频压缩
+  compressVideos: (options: VideoCompressOptions): Promise<VideoCompressResult> => {
+    return ipcRenderer.invoke('video:compress', options)
+  },
+
   // 监听进度更新
   onProgress: (callback: (progress: number) => void): void => {
     ipcRenderer.on('progress:update', (_event, progress) => {
@@ -274,6 +299,18 @@ const electronAPI = {
   // 移除首帧提取进度监听
   removeExtractProgressListener: (): void => {
     ipcRenderer.removeAllListeners('extract:progress')
+  },
+
+  // 监听视频压缩进度
+  onVCompressProgress: (callback: (progress: CompressProgress) => void): void => {
+    ipcRenderer.on('vcompress:progress', (_event, progress) => {
+      callback(progress)
+    })
+  },
+
+  // 移除视频压缩进度监听
+  removeVCompressProgressListener: (): void => {
+    ipcRenderer.removeAllListeners('vcompress:progress')
   }
 }
 

@@ -1,8 +1,5 @@
 <template>
-  <v-card
-    class="progress-card"
-    variant="outlined"
-  >
+  <v-card class="progress-card" variant="outlined">
     <v-card-text>
       <div class="d-flex align-center justify-space-between mb-2">
         <span class="text-body-2">{{ label }}</span>
@@ -17,10 +14,7 @@
         rounded
       />
 
-      <p
-        v-if="statusText"
-        class="text-caption text-medium-emphasis mt-2 mb-0"
-      >
+      <p v-if="statusText" class="text-caption text-medium-emphasis mt-2 mb-0">
         {{ statusText }}
       </p>
     </v-card-text>

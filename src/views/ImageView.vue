@@ -68,12 +68,7 @@
             <template #append>
               <v-tooltip location="top" text="勾选后将会处理输入目录及其所有子目录中的图片">
                 <template #activator="{ props }">
-                  <v-icon
-                    icon="mdi-help-circle-outline"
-                    v-bind="props"
-                    size="small"
-                    color="grey"
-                  />
+                  <v-icon icon="mdi-help-circle-outline" v-bind="props" size="small" color="grey" />
                 </template>
               </v-tooltip>
             </template>
@@ -338,7 +333,7 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .image-container {
   max-width: 800px;
 }
@@ -362,17 +357,17 @@ onUnmounted(() => {
 .page-title {
   font-size: 28px;
   font-weight: 300;
-  color: #f5a623;
+  color: $primary-color;
   margin: 0;
 }
 
 .page-subtitle {
   font-size: 14px;
-  color: #888;
+  color: $text-tertiary;
   margin: 4px 0 0;
 }
 
-/* 字段标签 */
+// 字段标签
 .label-row {
   display: flex;
   align-items: center;
@@ -385,34 +380,32 @@ onUnmounted(() => {
   color: #555;
 }
 
-/* 路径显示 */
+// 路径显示
 .path-display {
+  @include glass-input;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 14px;
-  background: #f5f5f5;
-  border-radius: 8px;
 }
 
 .path-text {
   flex: 1;
   font-size: 13px;
-  color: #666;
+  color: $text-secondary;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* 大小控制 */
+// 大小控制
 .size-control {
+  @include glass-control;
+
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 16px;
-  background: #fafafa;
-  border-radius: 8px;
 }
 
 .size-slider-group {
@@ -426,18 +419,16 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   font-size: 13px;
-  color: #666;
+  color: $text-secondary;
 }
 
 .size-slider {
   flex: 1;
 }
 
-/* 进度区域 */
+// 进度区域
 .progress-section {
-  padding: 16px;
-  background: #f5f5f5;
-  border-radius: 8px;
+  @include glass-control;
 }
 
 .progress-header {
@@ -457,7 +448,7 @@ onUnmounted(() => {
   background: #1e1e1e;
   color: #d4d4d4;
   padding: 12px;
-  border-radius: 8px;
+  border-radius: $radius-sm;
   max-height: 200px;
   overflow-y: auto;
   font-size: 12px;
@@ -469,7 +460,7 @@ onUnmounted(() => {
   word-break: break-all;
 }
 
-/* 提示信息 */
+// 提示信息
 .alert-content {
   display: flex;
   gap: 4px;
@@ -479,7 +470,7 @@ onUnmounted(() => {
   font-weight: 500;
 }
 
-/* 底部装饰 */
+// 底部装饰
 .footer-decoration {
   display: flex;
   justify-content: center;
@@ -491,10 +482,10 @@ onUnmounted(() => {
   height: 60px;
   opacity: 0.7;
   transition: transform 0.3s ease;
-}
 
-.footer-pet:hover {
-  transform: scale(1.1) rotate(10deg);
-  opacity: 1;
+  &:hover {
+    transform: scale(1.1) rotate(10deg);
+    opacity: 1;
+  }
 }
 </style>

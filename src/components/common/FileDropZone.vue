@@ -96,29 +96,44 @@ const reset = () => {
 defineExpose({ reset })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .file-drop-zone {
-  border: 2px dashed #e0e0e0;
-  border-radius: 12px;
+  border: 2px dashed rgba(224, 224, 224, 0.6);
+  border-radius: $radius-md;
   padding: 48px 24px;
   text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  background-color: #fffdf7;
-}
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border: 2px dashed rgba(200, 200, 200, 0.6) !important;
+  box-shadow:
+    0 4px 30px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
 
-.file-drop-zone:hover {
-  border-color: #f5a623;
-  background-color: #fff8e1;
-}
+  &:hover {
+    border-color: $primary-color;
+    background: rgba(255, 248, 225, 0.7);
+    box-shadow:
+      0 4px 30px rgba(245, 166, 35, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
 
-.file-drop-zone.is-dragging {
-  border-color: #f5a623;
-  background-color: #fff3e0;
-}
+  &.is-dragging {
+    border-color: $primary-color;
+    background: rgba(255, 243, 224, 0.8);
+    box-shadow:
+      0 4px 30px rgba(245, 166, 35, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
 
-.file-drop-zone.has-file {
-  border-color: #66bb6a;
-  background-color: #e8f5e9;
+  &.has-file {
+    border-color: #66bb6a;
+    background: rgba(232, 245, 233, 0.7);
+    box-shadow:
+      0 4px 30px rgba(102, 187, 106, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
 }
 </style>

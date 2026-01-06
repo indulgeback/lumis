@@ -105,11 +105,58 @@ lumis/
 
 MIT
 
-## macOS 安全提示
+## macOS 使用说明
+
+### Python 环境安装
+
+本应用需要 Python 3.8 或更高版本才能运行视频处理功能。macOS 用户可以通过以下方式安装 Python：
+
+#### 方法一：使用 Homebrew（推荐）
+
+Homebrew 是 macOS 上最流行的包管理器：
+
+```bash
+# 安装 Homebrew（如果尚未安装）
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# 使用 Homebrew 安装 Python
+brew install python@3.11
+```
+
+#### 方法二：官方安装包
+
+访问 [Python 官网](https://www.python.org/downloads/) 下载 macOS 安装包。
+
+#### 方法三：使用 pyenv
+
+```bash
+# 使用 Homebrew 安装 pyenv
+brew install pyenv
+
+# 安装 Python 3.11
+pyenv install 3.11.7
+
+# 设置全局 Python 版本
+pyenv global 3.11.7
+```
+
+#### 验证安装
+
+安装完成后，在终端运行以下命令验证：
+
+```bash
+python3 --version
+# 或
+python3.11 --version
+```
+
+---
+
+### 安全提示
 
 由于本项目未使用 Apple Developer 证书进行签名，首次打开应用时 macOS 可能会提示"已损坏"或阻止打开。
 
-### ⚡ 一键解决（推荐）
+#### ⚡ 一键解决（推荐）
 
 打开终端，复制粘贴以下命令并回车：
 
@@ -121,7 +168,7 @@ xattr -cr /Applications/Lumis.app && open /Applications/Lumis.app
 
 ---
 
-### 其他方法
+#### 其他方法
 
 **右键打开**
 
@@ -136,3 +183,13 @@ xattr -cr /Applications/Lumis.app && open /Applications/Lumis.app
 3. 点击"仍要打开"
 
 > **注意**：这些提示是因为应用未经过 Apple 官方签名认证，但不代表应用不安全。本项目代码完全开源，您可以自行审查源码。
+
+---
+
+### 首次使用
+
+1. 启动应用后，点击侧边栏底部的环境状态区域
+2. 应用会自动检测 Python 环境
+3. 如果 Python 未安装，请按照上述方法安装
+4. 点击"一键安装"按钮安装 `frame-extractor` 工具
+5. 安装完成后即可开始使用所有功能

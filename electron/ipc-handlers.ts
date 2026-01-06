@@ -102,6 +102,26 @@ export interface ExtractFirstFrameResult {
   error?: string
 }
 
+// 视频压缩选项接口
+export interface VideoCompressOptions {
+  inputPath: string
+  outputPath: string
+  recursive?: boolean
+  quality?: number
+  preset?: string
+  workers?: number
+}
+
+// 视频压缩结果接口
+export interface VideoCompressResult {
+  success: boolean
+  totalVideos?: number
+  successCount?: number
+  failedCount?: number
+  message: string
+  error?: string
+}
+
 export const ALL_MEDIA_FILTERS: Electron.FileFilter[] = [
   {
     name: '所有媒体文件',
@@ -663,6 +683,113 @@ export function registerIPCHandlers(mainWindow: BrowserWindow): void {
       })
     }
   )
+
+  // 视频压缩
+  ipcMain.handle(
+    'video:compress',
+    async (_event, options: VideoCompressOptions): Promise<VideoCompressResult> => {
+      console.log('[VideoCompress] 开始压缩视频:', options)
+
+      // 查找工具路径
+      const toolPaths = [`${process.env.HOME}/.local/bin/frame-extractor`, 'frame-extractor']
+
+      // 找到可用的工具
+      let toolPath: string | null = null
+      for (const path of toolPaths) {
+        try {
+          const checkResult = await tryToolPath(path)
+          if (checkResult.installed) {
+            toolPath = path
+            break
+          }
+        } catch {
+          continue
+        }
+      }
+
+      if (!toolPath) {
+        return {
+          success: false,
+          message: '视频压缩失败',
+          error: 'frame-extractor 未安装，请先安装'
+        }
+      }
+
+      // 构建命令参数: frame-extractor vcompress -i input -o output -q X -p Y -r -w Z
+      const args = ['vcompress', '-i', options.inputPath, '-o', options.outputPath]
+
+      if (options.recursive) {
+        args.push('-r')
+      }
+
+      if (options.quality !== undefined) {
+        args.push('-q', String(options.quality))
+      }
+
+      if (options.preset !== undefined) {
+        args.push('-p', options.preset)
+      }
+
+      if (options.workers !== undefined) {
+        args.push('-w', String(options.workers))
+      }
+
+      console.log('[VideoCompress] 执行命令:', toolPath, args.join(' '))
+
+      return new Promise(resolve => {
+        const compressProcess = spawn(toolPath, args)
+        let stdout = ''
+        let stderr = ''
+
+        compressProcess.stdout?.on('data', (data: Buffer) => {
+          const output = data.toString()
+          stdout += output
+          console.log('[VideoCompress] ' + output.trim())
+          // 发送进度到渲染进程
+          mainWindow?.webContents.send('vcompress:progress', {
+            type: 'log',
+            message: output
+          })
+        })
+
+        compressProcess.stderr.on('data', (data: Buffer) => {
+          const output = data.toString()
+          stderr += output
+          console.log('[VideoCompress] ' + output.trim())
+          mainWindow?.webContents.send('vcompress:progress', {
+            type: 'log',
+            message: output
+          })
+        })
+
+        compressProcess.on('close', (code: number | null) => {
+          if (code === 0) {
+            console.log('[VideoCompress] ✅ 完成')
+            resolve({
+              success: true,
+              message: '视频压缩完成'
+            })
+          } else {
+            console.log('[VideoCompress] ❌ 失败:', stderr)
+            resolve({
+              success: false,
+              message: '视频压缩失败',
+              error: stderr || '未知错误'
+            })
+          }
+        })
+
+        compressProcess.on('error', (error: Error) => {
+          console.log('[VideoCompress] ❌ 错误:', error.message)
+          resolve({
+            success: false,
+            message: '视频压缩失败',
+            error: error.message
+          })
+        })
+      })
+    }
+  )
 }
 
 /**
@@ -675,7 +802,8 @@ function parseCompressOutput(output: string): Partial<BatchCompressResult> {
   const totalFiles = totalMatch ? parseInt(totalMatch[1], 10) : 0
 
   // 检查是否有错误信息
-  const hasErrors = output.toLowerCase().includes('error') || output.toLowerCase().includes('failed')
+  const hasErrors =
+    output.toLowerCase().includes('error') || output.toLowerCase().includes('failed')
 
   return {
     totalFiles,
@@ -693,7 +821,8 @@ function parseExtractOutput(output: string): Partial<ExtractFirstFrameResult> {
   const totalVideos = totalMatch ? parseInt(totalMatch[1], 10) : 0
 
   // 检查是否有错误信息
-  const hasErrors = output.toLowerCase().includes('error') || output.toLowerCase().includes('failed')
+  const hasErrors =
+    output.toLowerCase().includes('error') || output.toLowerCase().includes('failed')
 
   return {
     totalVideos,

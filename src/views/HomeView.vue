@@ -3,48 +3,20 @@
     <!-- 顶部欢迎区域 -->
     <div class="welcome-section">
       <div class="welcome-content">
-        <img
-          src="@/assets/哈士奇.svg"
-          alt="Lumis"
-          class="welcome-pet"
-        >
+        <img src="@/assets/哈士奇.svg" alt="Lumis" class="welcome-pet" />
         <div class="welcome-text">
-          <h1 class="welcome-title">
-            欢迎来到 Lumis
-          </h1>
-          <p class="welcome-subtitle">
-            压缩你创造的美
-          </p>
+          <h1 class="welcome-title">欢迎来到 Lumis</h1>
+          <p class="welcome-subtitle">压缩你创造的美</p>
         </div>
       </div>
     </div>
 
     <!-- 功能卡片区域 -->
-    <v-row
-      justify="center"
-      class="feature-section"
-    >
-      <v-col
-        v-for="feature in features"
-        :key="feature.title"
-        cols="12"
-        sm="6"
-        md="4"
-      >
-        <v-card
-          :to="feature.to"
-          class="feature-card"
-          elevation="2"
-        >
-          <div
-            class="feature-header"
-            :style="{ background: feature.bgGradient }"
-          >
-            <img
-              :src="feature.pet"
-              :alt="feature.title"
-              class="feature-pet"
-            >
+    <v-row justify="center" class="feature-section">
+      <v-col v-for="feature in features" :key="feature.title" cols="12" sm="6" md="4">
+        <v-card :to="feature.to" class="feature-card" elevation="2">
+          <div class="feature-header" :style="{ background: feature.bgGradient }">
+            <img :src="feature.pet" :alt="feature.title" class="feature-pet" />
           </div>
           <v-card-item class="pa-4">
             <v-card-title class="text-h6">
@@ -73,29 +45,11 @@
     <!-- 底部装饰和信息 -->
     <div class="footer-section">
       <div class="footer-pets">
-        <img
-          src="@/assets/柯基.svg"
-          alt=""
-          class="footer-pet-small"
-        >
-        <img
-          src="@/assets/布偶猫.svg"
-          alt=""
-          class="footer-pet-small"
-        >
-        <img
-          src="@/assets/边牧.svg"
-          alt=""
-          class="footer-pet-small"
-        >
+        <img src="@/assets/柯基.svg" alt="" class="footer-pet-small" />
+        <img src="@/assets/布偶猫.svg" alt="" class="footer-pet-small" />
+        <img src="@/assets/边牧.svg" alt="" class="footer-pet-small" />
       </div>
-      <v-chip
-        variant="tonal"
-        size="small"
-        class="mt-4"
-      >
-        λύμη + ἴσος — 光的等价形态
-      </v-chip>
+      <v-chip variant="tonal" size="small" class="mt-4"> λύμη + ἴσος — 光的等价形态 </v-chip>
     </div>
   </v-container>
 </template>
@@ -132,13 +86,13 @@ const features = [
 ]
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .home-container {
   max-width: 1000px;
   min-height: 100vh;
 }
 
-/* 欢迎区域 */
+// 欢迎区域
 .welcome-section {
   text-align: center;
   padding: 32px 16px;
@@ -189,30 +143,56 @@ const features = [
 .welcome-title {
   font-size: 32px;
   font-weight: 300;
-  color: #f5a623;
+  color: $primary-color;
   margin: 0;
 }
 
 .welcome-subtitle {
   font-size: 14px;
-  color: #888;
+  color: $text-tertiary;
   margin: 4px 0 0;
 }
 
-/* 功能卡片 */
+// 功能卡片
 .feature-section {
   padding: 16px;
 }
 
 .feature-card {
   transition: all 0.3s ease;
-  border-radius: 16px;
+  border-radius: $radius-lg;
   overflow: hidden;
-}
 
-.feature-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+  // 液体玻璃效果
+  :deep(.v-card),
+  &.v-card {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    box-shadow:
+      0 4px 30px rgba(0, 0, 0, 0.1),
+      0 1px 3px rgba(0, 0, 0, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+  }
+
+  // 文字可读性增强
+  :deep(.v-card-title),
+  :deep(.v-card-subtitle),
+  :deep(.v-card-text) {
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  }
+
+  &:hover {
+    transform: translateY(-8px);
+
+    :deep(.v-card),
+    &.v-card {
+      box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+    }
+  }
 }
 
 .feature-header {
@@ -232,7 +212,7 @@ const features = [
   transform: scale(1.1);
 }
 
-/* 底部区域 */
+// 底部区域
 .footer-section {
   text-align: center;
   padding: 32px 16px;
@@ -250,10 +230,10 @@ const features = [
   height: 48px;
   opacity: 0.7;
   transition: all 0.3s ease;
-}
 
-.footer-pet-small:hover {
-  opacity: 1;
-  transform: scale(1.2) rotate(10deg);
+  &:hover {
+    opacity: 1;
+    transform: scale(1.2) rotate(10deg);
+  }
 }
 </style>

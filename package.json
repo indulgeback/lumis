@@ -1,6 +1,6 @@
 {
     "name": "lumis",
-    "version": "1.0.0-beta.3",
+    "version": "1.0.0",
     "description": "Lumis - 媒体处理桌面应用",
     "author": {
         "name": "LeviLiu"
@@ -31,8 +31,8 @@
     },
     "devDependencies": {
         "@types/node": "^20.11.28",
-        "@typescript-eslint/eslint-plugin": "^7.2.0",
-        "@typescript-eslint/parser": "^7.2.0",
+        "@typescript-eslint/eslint-plugin": "^8.51.0",
+        "@typescript-eslint/parser": "^8.51.0",
         "@vitejs/plugin-vue": "^5.0.4",
         "@vue/test-utils": "^2.4.5",
         "electron": "^29.1.4",
@@ -44,7 +44,7 @@
         "fast-check": "^3.17.0",
         "jsdom": "^24.0.0",
         "prettier": "^3.2.5",
-        "sass": "^1.72.0",
+        "sass": "^1.97.0",
         "typescript": "^5.4.2",
         "vite": "^5.2.0",
         "vite-plugin-electron": "^0.28.4",

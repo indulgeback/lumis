@@ -2,10 +2,7 @@
   <v-card class="collapsible-card" :elevation="elevation">
     <v-card-item class="card-header-item" @click="toggle">
       <div class="card-header">
-        <div
-          class="card-icon-wrapper"
-          :style="{ background: iconBackground }"
-        >
+        <div class="card-icon-wrapper" :style="{ background: iconBackground }">
           <v-icon :icon="icon" :size="28" :color="iconColor" />
         </div>
         <div class="card-title-group">
@@ -72,10 +69,32 @@ defineExpose({
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .collapsible-card {
-  border-radius: 16px;
-  overflow: hidden;
+  @include glass-card;
+
+  // 覆盖 Vuetify 的默认背景色
+  :deep(.v-card),
+  &.v-card {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    box-shadow:
+      0 4px 30px rgba(0, 0, 0, 0.1),
+      0 1px 3px rgba(0, 0, 0, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+  }
+
+  .card-icon-wrapper {
+    @include glass-icon;
+  }
+
+  // 文字可读性增强
+  .card-title,
+  .card-subtitle {
+    @include text-on-glass;
+  }
 }
 
 .card-header-item {
@@ -92,7 +111,6 @@ defineExpose({
 .card-icon-wrapper {
   width: 56px;
   height: 56px;
-  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -107,11 +125,12 @@ defineExpose({
   font-size: 18px;
   font-weight: 500;
   margin: 0 0 4px;
+  color: $text-primary;
 }
 
 .card-subtitle {
   font-size: 13px;
-  color: #888;
+  color: $text-secondary;
   margin: 0;
 }
 

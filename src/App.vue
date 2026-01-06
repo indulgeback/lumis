@@ -338,6 +338,11 @@ body {
 </style>
 
 <style scoped>
+/* 主内容区域 - 渐变背景以显示玻璃效果 */
+:deep(.v-main) {
+  background: linear-gradient(135deg, #fff8e1 0%, #fff3e0 30%, #ffe0b2 60%, #ffcc80 100%);
+}
+
 /* 侧边栏样式 */
 .app-drawer {
   background: linear-gradient(180deg, #fff8e1 0%, #ffffff 100%);
