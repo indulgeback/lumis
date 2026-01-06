@@ -58,6 +58,37 @@ const progressColor = computed(() => {
 
 <style scoped>
 .progress-card {
-  border-radius: 12px;
+  @include glass-card;
+  border-radius: $radius-lg;
+  overflow: hidden;
+
+  :deep(.v-card),
+  &.v-card {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(24px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.06),
+      0 16px 32px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.4) !important;
+  }
+
+  // 文字可读性增强
+  :deep(.v-card-text) {
+    @include text-on-glass;
+  }
+}
+
+// 进度条动画增强
+:deep(.v-progress-linear) {
+  .v-progress-linear__background {
+    background: rgba(0, 0, 0, 0.05) !important;
+  }
+
+  .v-progress-linear__determinate {
+    transition: width 0.3s $ease-out;
+  }
 }
 </style>

@@ -101,21 +101,47 @@ const formatSize = (bytes: number): string => {
 <style lang="scss" scoped>
 .result-card {
   @include glass-card;
+  @include scale-in-animation(0.4s);
 
   // 覆盖 Vuetify 的默认背景色
   :deep(.v-card),
   &.v-card {
     background: rgba(255, 255, 255, 0.85) !important;
-    backdrop-filter: blur(20px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    backdrop-filter: blur(24px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
     box-shadow:
-      0 4px 30px rgba(0, 0, 0, 0.1),
-      0 1px 3px rgba(0, 0, 0, 0.05),
-      inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+      0 4px 16px rgba(0, 0, 0, 0.06),
+      0 16px 32px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.4) !important;
   }
 
-  border-radius: $radius-md;
+  border-radius: $radius-lg;
+
+  // 成功状态下的绿色光晕
+  &[data-success="true"] {
+    :deep(.v-card),
+    &.v-card {
+      box-shadow:
+        0 4px 16px rgba(102, 187, 106, 0.15),
+        0 16px 32px rgba(102, 187, 106, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.4) !important;
+    }
+  }
+
+  // 失败状态下的红色光晕
+  &[data-success="false"] {
+    :deep(.v-card),
+    &.v-card {
+      box-shadow:
+        0 4px 16px rgba(239, 83, 80, 0.15),
+        0 16px 32px rgba(239, 83, 80, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.4) !important;
+    }
+  }
 
   // 文字可读性增强
   :deep(.v-card-text),
@@ -125,10 +151,41 @@ const formatSize = (bytes: number): string => {
 }
 
 .output-path {
-  background: rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(10px);
-  padding: 8px 12px;
-  border-radius: $radius-sm;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  @include glass-input;
+  margin-top: $spacing-md;
+  font-family: 'Monaco', 'Menlo', monospace;
+  font-size: 12px;
+}
+
+.result-details {
+  animation: fadeIn 0.4s ease-out;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+.error-details {
+  color: $error-color;
+  animation: shake 0.4s ease-out;
+
+  @keyframes shake {
+    0%, 100% {
+      transform: translateX(0);
+    }
+    25% {
+      transform: translateX(-4px);
+    }
+    75% {
+      transform: translateX(4px);
+    }
+  }
 }
 </style>

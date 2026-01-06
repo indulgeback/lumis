@@ -338,14 +338,34 @@ body {
 </style>
 
 <style scoped>
-/* 主内容区域 - 渐变背景以显示玻璃效果 */
+/* 主内容区域 - 增强的渐变背景 */
 :deep(.v-main) {
-  background: linear-gradient(135deg, #fff8e1 0%, #fff3e0 30%, #ffe0b2 60%, #ffcc80 100%);
+  background:
+    linear-gradient(135deg, rgba(255, 248, 225, 0.9) 0%, rgba(255, 243, 224, 0.85) 25%),
+    linear-gradient(225deg, rgba(255, 224, 178, 0.8) 0%, rgba(255, 204, 128, 0.75) 100%),
+    linear-gradient(45deg, #fff9e6 0%, #ffe8cc 50%, #ffd699 100%);
+  background-size: 200% 200%;
+  animation: gradientShift 20s ease infinite;
+
+  @keyframes gradientShift {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
 }
 
-/* 侧边栏样式 */
+/* 侧边栏样式 - 增强玻璃效果 */
 .app-drawer {
-  background: linear-gradient(180deg, #fff8e1 0%, #ffffff 100%);
+  background: linear-gradient(180deg, rgba(255, 248, 225, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-right: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    4px 0 24px rgba(0, 0, 0, 0.04),
+    inset -1px 0 0 rgba(255, 255, 255, 0.8);
 }
 
 .drawer-header {

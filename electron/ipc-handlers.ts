@@ -165,6 +165,22 @@ export interface InstallResult {
 }
 
 /**
+ * 安全地向渲染进程发送消息
+ * @param mainWindow 主窗口实例
+ * @param channel IPC 通道名称
+ * @param data 要发送的数据
+ */
+function safeSend(mainWindow: BrowserWindow | null, channel: string, data: unknown): void {
+  if (
+    mainWindow &&
+    !mainWindow.isDestroyed() &&
+    !mainWindow.webContents.isDestroyed()
+  ) {
+    mainWindow.webContents.send(channel, data)
+  }
+}
+
+/**
  * 注册所有 IPC 处理器
  * @param mainWindow 主窗口实例
  */
@@ -334,14 +350,14 @@ export function registerIPCHandlers(mainWindow: BrowserWindow): void {
         const output = cleanOutput(data.toString())
         console.log('[Install] ' + output.trim())
         // 发送安装进度到渲染进程
-        mainWindow?.webContents.send('tool:installProgress', output)
+        safeSend(mainWindow, 'tool:installProgress', output)
       })
 
       installProcess.stderr?.on('data', (data: Buffer) => {
         const output = cleanOutput(data.toString())
         installStderr += output
         console.log('[Install] ' + output.trim())
-        mainWindow?.webContents.send('tool:installProgress', output)
+        safeSend(mainWindow, 'tool:installProgress', output)
       })
 
       installProcess.on('close', async (code: number | null) => {
@@ -522,7 +538,7 @@ export function registerIPCHandlers(mainWindow: BrowserWindow): void {
           stdout += output
           console.log('[BatchCompress] ' + output.trim())
           // 发送进度到渲染进程
-          mainWindow?.webContents.send('compress:progress', {
+          safeSend(mainWindow, 'compress:progress', {
             type: 'log',
             message: output
           })
@@ -532,7 +548,7 @@ export function registerIPCHandlers(mainWindow: BrowserWindow): void {
           const output = data.toString()
           stderr += output
           console.log('[BatchCompress] ' + output.trim())
-          mainWindow?.webContents.send('compress:progress', {
+          safeSend(mainWindow, 'compress:progress', {
             type: 'log',
             message: output
           })
@@ -636,7 +652,7 @@ export function registerIPCHandlers(mainWindow: BrowserWindow): void {
           stdout += output
           console.log('[ExtractFirstFrame] ' + output.trim())
           // 发送进度到渲染进程
-          mainWindow?.webContents.send('extract:progress', {
+          safeSend(mainWindow, 'extract:progress', {
             type: 'log',
             message: output
           })
@@ -646,7 +662,7 @@ export function registerIPCHandlers(mainWindow: BrowserWindow): void {
           const output = data.toString()
           stderr += output
           console.log('[ExtractFirstFrame] ' + output.trim())
-          mainWindow?.webContents.send('extract:progress', {
+          safeSend(mainWindow, 'extract:progress', {
             type: 'log',
             message: output
           })
@@ -746,7 +762,7 @@ export function registerIPCHandlers(mainWindow: BrowserWindow): void {
           stdout += output
           console.log('[VideoCompress] ' + output.trim())
           // 发送进度到渲染进程
-          mainWindow?.webContents.send('vcompress:progress', {
+          safeSend(mainWindow, 'vcompress:progress', {
             type: 'log',
             message: output
           })
@@ -756,7 +772,7 @@ export function registerIPCHandlers(mainWindow: BrowserWindow): void {
           const output = data.toString()
           stderr += output
           console.log('[VideoCompress] ' + output.trim())
-          mainWindow?.webContents.send('vcompress:progress', {
+          safeSend(mainWindow, 'vcompress:progress', {
             type: 'log',
             message: output
           })

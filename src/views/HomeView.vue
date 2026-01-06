@@ -88,152 +88,215 @@ const features = [
 
 <style lang="scss" scoped>
 .home-container {
-  max-width: 1000px;
+  max-width: 1100px;
   min-height: 100vh;
 }
 
 // 欢迎区域
 .welcome-section {
   text-align: center;
-  padding: 32px 16px;
+  padding: $spacing-3xl $spacing-lg;
 }
 
 .welcome-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: $spacing-lg;
 }
 
 .welcome-pet {
-  width: 100px;
-  height: 100px;
-  animation: bounce-in 0.8s ease-out;
-}
+  width: 120px;
+  height: 120px;
+  filter: drop-shadow(0 8px 16px rgba(245, 166, 35, 0.2));
+  @include scale-in-animation(0.8s);
 
-@keyframes bounce-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.3) translateY(-50px);
-  }
-  50% {
-    transform: scale(1.05) translateY(5px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
+  // 添加悬浮动画
+  animation: scaleIn 0.8s $ease-bounce both, float 4s ease-in-out 1s infinite;
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-12px);
+    }
   }
 }
 
 .welcome-text {
-  animation: fade-up 0.6s ease-out 0.3s both;
-}
-
-@keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  @include fade-in-animation(0.7s, 0.2s);
 }
 
 .welcome-title {
-  font-size: 32px;
-  font-weight: 300;
+  font-size: 36px;
+  font-weight: 600;
   color: $primary-color;
   margin: 0;
+  letter-spacing: 0.02em;
+  @include text-on-glass;
 }
 
 .welcome-subtitle {
-  font-size: 14px;
-  color: $text-tertiary;
-  margin: 4px 0 0;
+  font-size: 15px;
+  color: $text-secondary;
+  margin: $spacing-sm 0 0;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  @include text-on-glass;
 }
 
-// 功能卡片
+// 功能卡片区域
 .feature-section {
-  padding: 16px;
+  padding: $spacing-xl $spacing-lg;
 }
 
 .feature-card {
-  transition: all 0.3s ease;
-  border-radius: $radius-lg;
-  overflow: hidden;
+  @include glass-card;
+  @include fade-in-animation(0.6s);
 
-  // 液体玻璃效果
+  // 为每个卡片添加不同的延迟
+  &:nth-child(1) {
+    animation-delay: 0.3s;
+  }
+
+  &:nth-child(2) {
+    animation-delay: 0.4s;
+  }
+
+  &:nth-child(3) {
+    animation-delay: 0.5s;
+  }
+
+  // 覆盖 Vuetify 样式
   :deep(.v-card),
   &.v-card {
     background: rgba(255, 255, 255, 0.85) !important;
-    backdrop-filter: blur(20px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    backdrop-filter: blur(24px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
     box-shadow:
-      0 4px 30px rgba(0, 0, 0, 0.1),
-      0 1px 3px rgba(0, 0, 0, 0.05),
-      inset 0 1px 0 rgba(255, 255, 255, 0.6) !important;
+      0 4px 16px rgba(0, 0, 0, 0.06),
+      0 16px 32px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.4) !important;
   }
 
   // 文字可读性增强
   :deep(.v-card-title),
   :deep(.v-card-subtitle),
   :deep(.v-card-text) {
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+    @include text-on-glass;
   }
 
+  // 悬停效果
   &:hover {
-    transform: translateY(-8px);
+    transform: translateY(-12px) scale(1.02);
 
     :deep(.v-card),
     &.v-card {
       box-shadow:
-        0 20px 40px rgba(0, 0, 0, 0.15),
-        inset 0 1px 0 rgba(255, 255, 255, 0.7) !important;
+        0 12px 32px rgba(0, 0, 0, 0.1),
+        0 32px 64px rgba(245, 166, 35, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.5) !important;
     }
+
+    .feature-pet {
+      transform: scale(1.15) rotate(5deg);
+    }
+  }
+
+  // 点击效果
+  &:active {
+    transform: translateY(-8px) scale(0.98);
   }
 }
 
 .feature-header {
-  height: 120px;
+  height: 140px;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  overflow: hidden;
+
+  // 添加光泽效果
+  &::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      45deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.3) 50%,
+      transparent 70%
+    );
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+  }
+
+  .feature-card:hover &::after {
+    transform: translateX(100%);
+  }
 }
 
 .feature-pet {
-  width: 80px;
-  height: 80px;
-  transition: transform 0.3s ease;
-}
-
-.feature-card:hover .feature-pet {
-  transform: scale(1.1);
+  width: 90px;
+  height: 90px;
+  transition: all $transition-slow $ease-out;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.1));
 }
 
 // 底部区域
 .footer-section {
   text-align: center;
-  padding: 32px 16px;
+  padding: $spacing-3xl $spacing-lg;
+  @include fade-in-animation(0.6s, 0.7s);
 }
 
 .footer-pets {
   display: flex;
   justify-content: center;
-  gap: 16px;
+  gap: $spacing-lg;
   flex-wrap: wrap;
 }
 
 .footer-pet-small {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   opacity: 0.7;
-  transition: all 0.3s ease;
+  transition: all $transition-normal $ease-out;
+  cursor: pointer;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
 
   &:hover {
     opacity: 1;
-    transform: scale(1.2) rotate(10deg);
+    transform: scale(1.3) rotate(15deg);
+    filter: drop-shadow(0 4px 16px rgba(245, 166, 35, 0.3));
   }
+
+  // 为每个宠物添加不同的悬浮动画延迟
+  &:nth-child(1) {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  &:nth-child(2) {
+    animation: float 3.5s ease-in-out 0.5s infinite;
+  }
+
+  &:nth-child(3) {
+    animation: float 4s ease-in-out 1s infinite;
+  }
+}
+
+// 芯片样式增强
+:deep(.v-chip) {
+  @include glass-control;
+  font-weight: 500;
+  letter-spacing: 0.05em;
 }
 </style>

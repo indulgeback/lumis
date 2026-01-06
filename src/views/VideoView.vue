@@ -778,19 +778,26 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .video-container {
-  max-width: 800px;
+  max-width: 900px;
 }
 
 .page-header {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 20px 0;
+  gap: $spacing-xl;
+  padding: $spacing-xl 0;
+  @include fade-in-animation(0.5s);
 }
 
 .page-pet {
-  width: 80px;
-  height: 80px;
+  width: 88px;
+  height: 88px;
+  filter: drop-shadow(0 4px 12px rgba(68, 165, 245, 0.2));
+  transition: all $transition-normal $ease-out;
+
+  &:hover {
+    transform: scale(1.05) rotate(5deg);
+  }
 }
 
 .header-text {
@@ -799,28 +806,36 @@ onUnmounted(() => {
 
 .page-title {
   font-size: 28px;
-  font-weight: 300;
-  color: $primary-color;
+  font-weight: 600;
+  color: $secondary-color;
   margin: 0;
+  @include text-on-glass;
 }
 
 .page-subtitle {
   font-size: 14px;
-  color: $text-tertiary;
-  margin: 4px 0 0;
+  color: $text-secondary;
+  margin: $spacing-sm 0 0;
+  @include text-on-glass;
+}
+
+// 卡片间距优化
+:deep(.v-col) {
+  padding: $spacing-md $spacing-sm !important;
 }
 
 // 字段标签
 .label-row {
   display: flex;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: $spacing-md;
 }
 
 .field-label {
   font-size: 14px;
-  font-weight: 500;
-  color: #555;
+  font-weight: 600;
+  color: $text-primary;
+  @include text-on-glass;
 }
 
 // 路径显示
@@ -830,7 +845,13 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: $spacing-md;
+  transition: all $transition-normal $ease-out;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.9);
+    transform: translateY(-1px);
+  }
 }
 
 .path-text {
@@ -848,13 +869,14 @@ onUnmounted(() => {
 
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: $spacing-lg;
+  margin-bottom: $spacing-lg;
 }
 
 .size-slider-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: $spacing-sm;
 }
 
 .size-label {
@@ -862,6 +884,7 @@ onUnmounted(() => {
   justify-content: space-between;
   align-items: center;
   font-size: 13px;
+  font-weight: 500;
   color: $text-secondary;
 }
 
@@ -872,29 +895,32 @@ onUnmounted(() => {
 // 进度区域
 .progress-section {
   @include glass-control;
+  margin-bottom: $spacing-lg;
 }
 
 .progress-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: $spacing-md;
 }
 
 .progress-title {
   font-size: 14px;
-  font-weight: 500;
-  color: #555;
+  font-weight: 600;
+  color: $text-primary;
 }
 
 .extract-log {
   background: #1e1e1e;
   color: #d4d4d4;
-  padding: 12px;
-  border-radius: $radius-sm;
+  padding: $spacing-md;
+  border-radius: $radius-md;
   max-height: 200px;
   overflow-y: auto;
   font-size: 12px;
+  font-family: 'Monaco', 'Menlo', monospace;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .extract-log pre {
@@ -906,87 +932,85 @@ onUnmounted(() => {
 // 提示信息
 .alert-content {
   display: flex;
-  gap: 4px;
+  gap: $spacing-xs;
 }
 
 .alert-title {
-  font-weight: 500;
+  font-weight: 600;
 }
 
-// 即将推出卡片
-.coming-soon-card {
+// 选项行
+.option-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: $spacing-md;
 }
 
-.coming-soon-content {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  width: 100%;
-}
-
-.coming-soon-text {
-  flex: 1;
-}
-
-.card-icon-wrapper {
-  width: 56px;
-  height: 56px;
-  border-radius: $radius-md;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.card-title {
-  font-size: 18px;
-  font-weight: 500;
-  margin: 0 0 4px;
-}
-
-.card-subtitle {
+.option-label {
   font-size: 13px;
-  color: $text-tertiary;
-  margin: 0;
+  font-weight: 600;
+  color: $text-secondary;
+}
+
+.preset-select {
+  flex: 1;
+  max-width: 300px;
+
+  :deep(.v-field) {
+    @include glass-input;
+  }
 }
 
 // 底部装饰
 .footer-decoration {
   display: flex;
   justify-content: center;
-  padding: 24px 0;
+  padding: $spacing-2xl 0;
+  @include fade-in-animation(0.5s, 0.8s);
 }
 
 .footer-pet {
-  width: 60px;
-  height: 60px;
-  opacity: 0.7;
-  transition: transform 0.3s ease;
+  width: 64px;
+  height: 64px;
+  opacity: 0.75;
+  transition: all $transition-normal $ease-out;
+  cursor: pointer;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
 
   &:hover {
-    transform: scale(1.1) rotate(10deg);
+    transform: scale(1.2) rotate(15deg);
     opacity: 1;
+    filter: drop-shadow(0 4px 16px rgba(68, 165, 245, 0.3));
   }
 }
 
-// 预设选择行
-.option-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+// Vuetify 覆盖样式
+:deep(.v-slider) {
+  .v-slider-thumb {
+    transition: transform $transition-fast $ease-out;
+
+    &:hover {
+      transform: scale(1.2);
+    }
+  }
 }
 
-.option-label {
-  font-size: 13px;
-  color: $text-secondary;
-  font-weight: 500;
+:deep(.v-btn) {
+  transition: all $transition-normal $ease-out;
+
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
-.preset-select {
-  flex: 1;
-  max-width: 300px;
+:deep(.v-checkbox) {
+  .v-selection-control {
+    transition: all $transition-normal $ease-out;
+
+    &:hover {
+      transform: translateX(4px);
+    }
+  }
 }
 </style>

@@ -4,6 +4,21 @@
 
 // 颜色
 $primary-color: #f5a623;
+$primary-light: #ffcc02;
+$primary-dark: #e6950c;
+
+$secondary-color: #42a5f5;
+$secondary-light: #80c7f9;
+$secondary-dark: #077bc4;
+
+$accent-color: #ab47bc;
+$accent-light: #de77e5;
+$accent-dark: #7c17a0;
+
+$success-color: #66bb6a;
+$warning-color: #ffa726;
+$error-color: #ef5350;
+
 $text-primary: #1a1a1a;
 $text-secondary: #4a4a4a;
 $text-tertiary: #6a6a6a;
@@ -14,44 +29,88 @@ $spacing-sm: 8px;
 $spacing-md: 12px;
 $spacing-lg: 16px;
 $spacing-xl: 24px;
+$spacing-2xl: 32px;
+$spacing-3xl: 48px;
 
 // 圆角
 $radius-sm: 8px;
 $radius-md: 12px;
 $radius-lg: 16px;
+$radius-xl: 20px;
+$radius-full: 9999px;
+
+// 过渡时长
+$transition-fast: 150ms;
+$transition-normal: 250ms;
+$transition-slow: 350ms;
+
+// 缓动函数
+$ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+$ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+$ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
 
 // ============================================
-// 液体玻璃效果 Mixin
+// 液体玻璃效果 Mixin (增强版)
 // ============================================
 
-// 基础液体玻璃效果
+// 基础液体玻璃效果 - 增强光影和深度
 @mixin glass-effect($intensity: 'medium') {
+  position: relative;
+  transition: all $transition-normal $ease-out;
+
   @if $intensity == 'light' {
-    background: rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(10px) saturate(180%);
-    -webkit-backdrop-filter: blur(10px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow:
-      0 2px 10px rgba(0, 0, 0, 0.05),
-      inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  } @else if $intensity == 'medium' {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow:
-      0 4px 30px rgba(0, 0, 0, 0.1),
-      0 1px 3px rgba(0, 0, 0, 0.05),
-      inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  } @else if $intensity == 'strong' {
-    background: rgba(255, 255, 255, 0.92);
-    backdrop-filter: blur(30px) saturate(180%);
-    -webkit-backdrop-filter: blur(30px) saturate(180%);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(16px) saturate(200%);
+    -webkit-backdrop-filter: blur(16px) saturate(200%);
     border: 1px solid rgba(255, 255, 255, 0.5);
     box-shadow:
-      0 8px 40px rgba(0, 0, 0, 0.12),
-      0 2px 6px rgba(0, 0, 0, 0.06),
-      inset 0 1px 0 rgba(255, 255, 255, 0.7);
+      0 2px 8px rgba(0, 0, 0, 0.04),
+      0 8px 16px rgba(0, 0, 0, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.8),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.3);
+  } @else if $intensity == 'medium' {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(24px) saturate(190%);
+    -webkit-backdrop-filter: blur(24px) saturate(190%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.06),
+      0 16px 32px rgba(0, 0, 0, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.4);
+  } @else if $intensity == 'strong' {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(32px) saturate(200%);
+    -webkit-backdrop-filter: blur(32px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.08),
+      0 24px 48px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.5);
+  }
+
+  // 添加微妙的高光效果
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.15) 0%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity $transition-normal $ease-out;
+  }
+
+  &:hover::before {
+    opacity: 1;
   }
 }
 
@@ -60,46 +119,148 @@ $radius-lg: 16px;
   @include glass-effect('medium');
   border-radius: $radius-lg;
   overflow: hidden;
+
+  // 悬停时轻微上浮
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.1),
+      0 24px 48px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.5);
+  }
 }
 
 // 图标容器液体玻璃效果
 @mixin glass-icon {
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: $radius-md;
   box-shadow:
-    0 4px 15px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 8px 24px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.4);
+  transition: all $transition-normal $ease-out;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow:
+      0 6px 20px rgba(0, 0, 0, 0.12),
+      0 12px 32px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 1);
+  }
 }
 
 // 输入区域液体玻璃效果
 @mixin glass-input {
   @include glass-effect('light');
-  padding: 10px 14px;
-  border-radius: $radius-sm;
+  padding: 14px 16px;
+  border-radius: $radius-md;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.85);
+    border-color: rgba(255, 255, 255, 0.7);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
 }
 
 // 控制区域液体玻璃效果
 @mixin glass-control {
   @include glass-effect('light');
   padding: $spacing-lg;
-  border-radius: $radius-sm;
+  border-radius: $radius-md;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.8);
+  }
 }
 
 // 文字可读性增强（用于玻璃效果上的文字）
 @mixin text-on-glass {
-  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+  text-shadow:
+    0 1px 2px rgba(255, 255, 255, 0.9),
+    0 0 0 transparent;
 }
 
 // 悬停效果增强
-@mixin glass-hover($color: #f5a623) {
+@mixin glass-hover($color: $primary-color) {
   &:hover {
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba($color, 0.3);
     box-shadow:
-      0 8px 40px rgba(0, 0, 0, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.7);
+      0 8px 32px rgba(0, 0, 0, 0.12),
+      0 16px 48px rgba($color, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 1);
+    transform: translateY(-2px);
+  }
+}
+
+// 浮动动画
+@mixin float-animation($duration: 3s) {
+  animation: float $duration ease-in-out infinite;
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+}
+
+// 脉冲动画
+@mixin pulse-animation($duration: 2s) {
+  animation: pulse $duration ease-in-out infinite;
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.8;
+      transform: scale(0.98);
+    }
+  }
+}
+
+// 渐入动画
+@mixin fade-in-animation($duration: 0.5s, $delay: 0s) {
+  animation: fadeIn $duration ease-out $delay both;
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+// 缩放动画
+@mixin scale-in-animation($duration: 0.4s, $delay: 0s) {
+  animation: scaleIn $duration $ease-bounce $delay both;
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
   }
 }
 
