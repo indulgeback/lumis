@@ -308,32 +308,16 @@ body {
   height: 100%;
 }
 
-/* 全局滚动条样式 */
+/* 全局滚动条隐藏 */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 0;
+  height: 0;
+  display: none;
 }
 
-/* 滚动条轨道 - 透明不占空间 */
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-/* 滚动条滑块 - 半透明主题色，悬浮在内容上 */
-::-webkit-scrollbar-thumb {
-  background: rgba(245, 166, 35, 0.5);
-  border-radius: 4px;
-}
-
-/* 滚动条滑块悬停 */
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(245, 166, 35, 0.7);
-}
-
-/* Firefox 滚动条 */
+/* Firefox 滚动条隐藏 */
 * {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(245, 166, 35, 0.5) transparent;
+  scrollbar-width: none;
 }
 </style>
 
@@ -348,7 +332,8 @@ body {
   animation: gradientShift 20s ease infinite;
 
   @keyframes gradientShift {
-    0%, 100% {
+    0%,
+    100% {
       background-position: 0% 50%;
     }
     50% {
