@@ -3,7 +3,7 @@
     <v-card-item class="card-header-item" @click="toggle">
       <div class="card-header">
         <div class="card-icon-wrapper" :style="{ background: iconBackground }">
-          <v-icon :icon="icon" :size="28" :color="iconColor" />
+          <v-icon :icon="icon" :size="24" :color="iconColor" />
         </div>
         <div class="card-title-group">
           <h3 class="card-title">{{ title }}</h3>
@@ -13,8 +13,7 @@
           :icon="expanded ? 'mdi-chevron-up' : 'mdi-chevron-down'"
           class="collapse-icon"
           :class="{ 'collapse-icon--expanded': expanded }"
-          size="24"
-          color="grey"
+          size="20"
         />
       </div>
     </v-card-item>
@@ -51,9 +50,9 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  iconColor: '#f5a623',
-  iconBackground: 'linear-gradient(135deg, #fff3e0, #ffe0b2)',
-  elevation: 2,
+  iconColor: '#059669',
+  iconBackground: '#d1fae5',
+  elevation: 0,
   defaultExpanded: false
 })
 
@@ -70,111 +69,89 @@ defineExpose({
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/variables.scss' as *;
+
 .collapsible-card {
-  @include glass-card;
-  @include fade-in-animation(0.5s);
-
-  // 覆盖 Vuetify 的默认背景色
-  :deep(.v-card),
-  &.v-card {
-    background: rgba(255, 255, 255, 0.85) !important;
-    backdrop-filter: blur(24px) saturate(190%) !important;
-    -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.6) !important;
-    box-shadow:
-      0 4px 16px rgba(0, 0, 0, 0.06),
-      0 16px 32px rgba(0, 0, 0, 0.06),
-      inset 0 1px 0 rgba(255, 255, 255, 0.9),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.4) !important;
-  }
-
-  .card-icon-wrapper {
-    @include glass-icon;
-  }
-
-  // 卡片悬停效果
-  &:hover {
-    .card-icon-wrapper {
-      transform: scale(1.08);
-    }
-  }
-
-  // 文字可读性增强
-  .card-title,
-  .card-subtitle {
-    @include text-on-glass;
-  }
+  @include fade-in(0.3s);
+  @include ios-glass-card;
+  border-radius: $radius-xl !important;
 }
 
 .card-header-item {
   cursor: pointer;
   user-select: none;
-  transition: all $transition-normal $ease-out;
-  border-radius: $radius-md $radius-md 0 0;
+  transition: all $duration-short $ease-standard;
+  padding: $spacing-md $spacing-lg;
 
   &:hover {
     background: rgba(255, 255, 255, 0.4);
   }
 
   &:active {
-    transform: scale(0.995);
+    background: rgba(255, 255, 255, 0.5);
   }
 }
 
 .card-header {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 4px 0;
+  gap: $spacing-md;
 }
 
 .card-icon-wrapper {
-  width: 64px;
-  height: 64px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   border-radius: $radius-lg;
-  transition: all $transition-normal $ease-out;
+  transition: transform $duration-short $ease-standard;
   box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.08),
-    0 8px 24px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.4);
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.collapsible-card:hover .card-icon-wrapper {
+  transform: scale(1.05);
 }
 
 .card-title-group {
   flex: 1;
+  min-width: 0;
 }
 
 .card-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  margin: 0 0 6px;
+  margin: 0;
   color: $text-primary;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.01em;
 }
 
 .card-subtitle {
   font-size: 13px;
   color: $text-secondary;
-  margin: 0;
+  margin: $spacing-xs 0 0;
   font-weight: 400;
 }
 
 .collapse-icon {
-  transition: transform $transition-slow $ease-in-out;
+  transition: transform $duration-medium $ease-emphasized;
   color: $text-tertiary;
+  flex-shrink: 0;
 }
 
 .collapse-icon--expanded {
   transform: rotate(180deg);
 }
 
-// 内容区域动画
+:deep(.v-divider) {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+
 .card-content {
-  animation: slideDown 0.3s ease-out;
+  animation: slideDown 0.25s $ease-decelerated;
 
   @keyframes slideDown {
     from {

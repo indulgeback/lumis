@@ -3,6 +3,9 @@
     <!-- 窗口拖动条 -->
     <div class="titlebar-drag-area" />
 
+    <!-- 背景动画 -->
+    <BackgroundAnimation />
+
     <!-- 启动动画 -->
     <SplashScreen v-if="showSplash" @complete="onSplashComplete" />
 
@@ -10,7 +13,14 @@
       <v-navigation-drawer permanent class="app-drawer">
         <!-- 头部 Logo -->
         <div class="drawer-header">
-          <img src="@/assets/柴犬.svg" alt="Lumis" class="drawer-logo" />
+          <Vue3Lottie
+            :animation-data="logoAnimation"
+            :loop="true"
+            :auto-play="true"
+            :height="48"
+            :width="48"
+            class="drawer-logo"
+          />
           <div class="drawer-title">
             <h1 class="title-text">Lumis</h1>
             <p class="title-subtitle">压缩你创造的美</p>
@@ -19,7 +29,7 @@
 
         <v-divider class="my-2" />
 
-        <v-list density="compact" nav>
+        <v-list class="nav-list" density="compact" nav>
           <v-list-item prepend-icon="mdi-home" title="首页" value="home" to="/" />
           <v-list-item prepend-icon="mdi-video" title="视频处理" value="video" to="/video" />
           <v-list-item prepend-icon="mdi-image" title="图片处理" value="image" to="/image" />
@@ -52,9 +62,7 @@
 
         <!-- 底部装饰 -->
         <template #append>
-          <div class="drawer-footer">
-            <img src="@/assets/金毛.svg" alt="" class="footer-pet" />
-          </div>
+          <div class="drawer-footer" />
         </template>
       </v-navigation-drawer>
 
@@ -64,7 +72,7 @@
 
       <!-- 环境详情对话框 -->
       <v-dialog v-model="showEnvDialog" max-width="480">
-        <v-card>
+        <v-card class="env-dialog">
           <v-card-title>环境状态</v-card-title>
 
           <v-card-text>
@@ -176,6 +184,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import SplashScreen from './components/common/SplashScreen.vue'
+import BackgroundAnimation from './components/common/BackgroundAnimation.vue'
+import logoAnimation from '@/assets/lottie/logo.json'
 
 const showSplash = ref(true)
 const appReady = ref(false)
@@ -336,44 +346,31 @@ body {
 }
 </style>
 
-<style scoped>
-/* 主内容区域 - 增强的渐变背景 */
-:deep(.v-main) {
-  background:
-    linear-gradient(135deg, rgba(255, 248, 225, 0.9) 0%, rgba(255, 243, 224, 0.85) 25%),
-    linear-gradient(225deg, rgba(255, 224, 178, 0.8) 0%, rgba(255, 204, 128, 0.75) 100%),
-    linear-gradient(45deg, #fff9e6 0%, #ffe8cc 50%, #ffd699 100%);
-  background-size: 200% 200%;
-  animation: gradientShift 20s ease infinite;
+<style scoped lang="scss">
+@use '@/styles/variables.scss' as *;
 
-  @keyframes gradientShift {
-    0%,
-    100% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
+/* 主内容区域 - 透明背景 */
+:deep(.v-main) {
+  background: transparent;
+  position: relative;
+  z-index: 1;
+}
+
+/* 侧边栏样式 - iOS 液态玻璃 */
+.app-drawer {
+  @include ios-glass-sidebar;
+
+  :deep(.v-navigation-drawer__content) {
+    display: flex;
+    flex-direction: column;
   }
 }
 
-/* 侧边栏样式 - 增强玻璃效果 */
-.app-drawer {
-  background: linear-gradient(180deg, rgba(255, 248, 225, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-right: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow:
-    4px 0 24px rgba(0, 0, 0, 0.04),
-    inset -1px 0 0 rgba(255, 255, 255, 0.8);
-}
-
 .drawer-header {
-  padding: 24px 16px;
+  padding: $spacing-3xl $spacing-lg $spacing-xl;
   display: flex;
   align-items: center;
-  gap: 12px;
-  /* 让该区域可拖动窗口 */
+  gap: $spacing-md;
   -webkit-app-region: drag;
 }
 
@@ -389,92 +386,154 @@ body {
 }
 
 .title-text {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 600;
-  color: #f5a623;
+  color: $primary-color;
   margin: 0;
   line-height: 1.2;
+  letter-spacing: -0.02em;
 }
 
 .title-subtitle {
   font-size: 12px;
-  color: #888;
+  color: $text-secondary;
   margin: 2px 0 0;
   line-height: 1.2;
 }
 
 .drawer-footer {
-  padding: 16px;
+  padding: $spacing-lg;
   text-align: center;
 }
 
 .footer-pet {
-  width: 80px;
-  height: 80px;
-  opacity: 0.8;
-  transition: transform 0.3s ease;
+  width: 64px;
+  height: 64px;
+  opacity: 0.6;
+  transition: all $duration-medium $ease-standard;
 }
 
 .footer-pet:hover {
-  transform: scale(1.1) rotate(5deg);
+  opacity: 1;
+  transform: scale(1.1);
 }
 
 /* 环境状态样式 */
 .env-ready :deep(.v-list-item-title) {
-  color: #66bb6a;
+  color: $success-color;
 }
 
 .env-error :deep(.v-list-item-title) {
-  color: #ef5350;
+  color: $error-color;
 }
 
 .env-warning :deep(.v-list-item-title) {
-  color: #ffa726;
+  color: $warning-color;
 }
 
 .env-section {
-  margin-bottom: 8px;
+  margin-bottom: $spacing-md;
 }
 
 .env-header {
   display: flex;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: $spacing-md;
 }
 
 .env-info {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 0;
+  padding: $spacing-sm 0;
 }
 
 .env-info .label {
-  color: #888;
+  color: $text-secondary;
   font-size: 14px;
 }
 
 .env-info code {
-  background: #f5f5f5;
-  padding: 2px 8px;
-  border-radius: 4px;
+  background: $surface-container-high;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-sm;
   font-size: 13px;
+  color: $text-primary;
 }
 
 .install-log {
-  background: #1e1e1e;
-  color: #d4d4d4;
-  padding: 12px;
-  border-radius: 8px;
+  background: #1a1a1a;
+  color: #e0e0e0;
+  padding: $spacing-md;
+  border-radius: $radius-md;
   max-height: 200px;
   overflow-y: auto;
   font-size: 12px;
-  margin-bottom: 12px;
+  margin-bottom: $spacing-md;
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
 }
 
 .install-log pre {
   margin: 0;
   white-space: pre-wrap;
   word-break: break-all;
+}
+
+/* 导航列表样式 */
+.nav-list {
+  padding: $spacing-sm $spacing-md;
+
+  :deep(.v-list-item) {
+    border-radius: $radius-full;
+    margin-bottom: $spacing-xs;
+    padding: 0 $spacing-md;
+
+    &::before {
+      border-radius: inherit;
+    }
+
+    .v-list-item__overlay {
+      border-radius: inherit;
+    }
+
+    &.v-list-item--active {
+      background: $primary-container;
+      color: $on-primary-container;
+
+      .v-list-item__prepend {
+        .v-icon {
+          color: $on-primary-container;
+        }
+      }
+    }
+
+    &:hover:not(.v-list-item--active) {
+      background: $surface-container-high;
+    }
+  }
+}
+
+/* 对话框样式 - iOS 液态玻璃 */
+.env-dialog {
+  @include ios-glass-card;
+
+  :deep(.v-card-title) {
+    padding: $spacing-lg $spacing-lg $spacing-sm;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  :deep(.v-card-text) {
+    padding: 0 $spacing-lg $spacing-lg;
+  }
+
+  :deep(.v-card-actions) {
+    padding: $spacing-sm $spacing-lg $spacing-lg;
+  }
+}
+
+/* 分隔线 - 半透明 */
+:deep(.v-navigation-drawer .v-divider) {
+  border-color: rgba(0, 0, 0, 0.06);
 }
 </style>

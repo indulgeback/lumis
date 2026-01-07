@@ -2,7 +2,6 @@
   <v-container class="video-container">
     <!-- 页面头部 -->
     <div class="page-header">
-      <img src="@/assets/法斗.svg" alt="" class="page-pet" />
       <div class="header-text">
         <h1 class="page-title">视频处理</h1>
         <p class="page-subtitle">压缩视频或提取首帧，轻松高效</p>
@@ -14,14 +13,14 @@
       title="批量首帧截取"
       subtitle="提取视频第一帧并转换为 WebP 格式"
       icon="mdi-image-frame"
-      icon-color="#42a5f5"
-      icon-background="linear-gradient(135deg, #e3f2fd, #bbdefb)"
+      icon-color="#f97316"
+      icon-background="#ffedd5"
     >
       <!-- 目录选择区域 -->
       <v-row class="mb-4">
         <v-col cols="12">
           <div class="label-row">
-            <v-icon icon="mdi-folder-open" color="#42a5f5" size="small" class="mr-1" />
+            <v-icon icon="mdi-folder-open" color="#f97316" size="small" class="mr-1" />
             <span class="field-label">输入目录</span>
           </div>
           <div class="path-display">
@@ -35,7 +34,7 @@
 
         <v-col cols="12">
           <div class="label-row">
-            <v-icon icon="mdi-folder-move" color="#42a5f5" size="small" class="mr-1" />
+            <v-icon icon="mdi-folder-move" color="#f97316" size="small" class="mr-1" />
             <span class="field-label">输出目录</span>
           </div>
           <div class="path-display">
@@ -52,7 +51,7 @@
       <v-row class="mb-4">
         <v-col cols="12">
           <div class="label-row mb-2">
-            <v-icon icon="mdi-tune" color="#42a5f5" size="small" class="mr-1" />
+            <v-icon icon="mdi-tune" color="#f97316" size="small" class="mr-1" />
             <span class="field-label">提取选项</span>
           </div>
 
@@ -255,87 +254,118 @@
       title="视频压缩"
       subtitle="H.264 编码压缩，减小视频体积"
       icon="mdi-video-minus"
-      icon-color="#f5a623"
-      icon-background="linear-gradient(135deg, #fff3e0, #ffe0b2)"
-      default-expanded
+      icon-color="#059669"
+      icon-background="#d1fae5"
     >
       <!-- 模式选择 -->
       <v-row class="mb-4">
         <v-col cols="12">
-          <div class="label-row mb-2">
-            <v-icon icon="mdi-swap-horizontal" color="#f5a623" size="small" class="mr-1" />
-            <span class="field-label">处理模式</span>
-          </div>
-          <v-btn-toggle v-model="compressMode" color="primary" variant="tonal" class="w-100">
-            <v-btn value="file" class="flex-grow-1">
+          <v-tabs v-model="compressMode" color="primary" class="compress-tabs">
+            <v-tab value="file">
               <v-icon icon="mdi-file-video" start />
               单文件
-            </v-btn>
-            <v-btn value="directory" class="flex-grow-1">
+            </v-tab>
+            <v-tab value="directory">
               <v-icon icon="mdi-folder-multiple" start />
               批量目录
-            </v-btn>
-          </v-btn-toggle>
+            </v-tab>
+          </v-tabs>
         </v-col>
       </v-row>
 
-      <!-- 单文件模式 -->
-      <template v-if="compressMode === 'file'">
-        <v-row class="mb-4">
-          <v-col cols="12">
-            <div class="label-row">
-              <v-icon icon="mdi-file" color="#f5a623" size="small" class="mr-1" />
-              <span class="field-label">视频文件</span>
-            </div>
-            <div class="path-display" @click="selectVideoFile">
-              <span class="path-text">{{ videoFilePath || '点击选择视频文件' }}</span>
-              <v-btn variant="tonal" color="primary" size="small">
-                <v-icon icon="mdi-folder-outline" left />
-                选择文件
-              </v-btn>
-            </div>
-          </v-col>
-        </v-row>
-      </template>
+      <v-window v-model="compressMode" class="compress-window">
+        <!-- 单文件模式 -->
+        <v-window-item value="file">
+          <v-row class="mb-4">
+            <v-col cols="12">
+              <div class="label-row">
+                <v-icon icon="mdi-file" color="#059669" size="small" class="mr-1" />
+                <span class="field-label">视频文件</span>
+              </div>
+              <div
+                class="file-drop-area"
+                :class="{ 'is-dragging': isVideoDragging, 'has-file': videoFilePath }"
+                @click="selectVideoFile"
+                @dragenter.prevent="onVideoDragEnter"
+                @dragover.prevent="onVideoDragOver"
+                @dragleave.prevent="onVideoDragLeave"
+                @drop.prevent="onVideoDrop"
+              >
+                <div v-if="!videoFilePath" class="drop-content">
+                  <v-icon
+                    :icon="isVideoDragging ? 'mdi-file-download' : 'mdi-file-video-outline'"
+                    :size="48"
+                    :color="isVideoDragging ? '#059669' : 'grey'"
+                    class="mb-2"
+                  />
+                  <p class="text-body-1 mb-1">
+                    {{ isVideoDragging ? '释放文件' : '拖拽视频文件到此处' }}
+                  </p>
+                  <p class="text-body-2 text-medium-emphasis">或点击选择文件</p>
+                  <p class="text-caption text-medium-emphasis mt-2">
+                    支持格式: MP4、AVI、MOV、MKV、WMV、FLV、WebM
+                  </p>
+                </div>
+                <div v-else class="file-selected">
+                  <v-icon icon="mdi-file-video" color="#66bb6a" size="small" class="mr-2" />
+                  <span class="file-name">{{ getFileName(videoFilePath) }}</span>
+                  <v-btn
+                    icon="mdi-close"
+                    variant="text"
+                    size="small"
+                    color="grey"
+                    @click.stop="clearVideoFile"
+                  />
+                </div>
+              </div>
+            </v-col>
+          </v-row>
+        </v-window-item>
 
-      <!-- 目录模式 -->
-      <template v-else>
-        <v-row class="mb-4">
-          <v-col cols="12">
-            <div class="label-row">
-              <v-icon icon="mdi-folder-open" color="#f5a623" size="small" class="mr-1" />
-              <span class="field-label">输入目录</span>
-            </div>
-            <div class="path-display">
-              <span class="path-text">{{ compressInputDir || '未选择' }}</span>
-              <v-btn variant="tonal" color="primary" size="small" @click="selectCompressInputDir">
-                <v-icon icon="mdi-folder-outline" left />
-                选择目录
-              </v-btn>
-            </div>
-          </v-col>
+        <!-- 目录模式 -->
+        <v-window-item value="directory">
+          <v-row class="mb-4">
+            <v-col cols="12">
+              <div class="label-row">
+                <v-icon icon="mdi-folder-open" color="#059669" size="small" class="mr-1" />
+                <span class="field-label">输入目录</span>
+              </div>
+              <div class="path-display">
+                <span class="path-text">{{ compressInputDir || '未选择' }}</span>
+                <v-btn variant="tonal" color="primary" size="small" @click="selectCompressInputDir">
+                  <v-icon icon="mdi-folder-outline" left />
+                  选择目录
+                </v-btn>
+              </div>
+            </v-col>
 
-          <v-col cols="12">
-            <div class="label-row">
-              <v-icon icon="mdi-folder-move" color="#f5a623" size="small" class="mr-1" />
-              <span class="field-label">输出目录</span>
-            </div>
-            <div class="path-display">
-              <span class="path-text">{{ compressOutputDir || '未选择' }}</span>
-              <v-btn variant="tonal" color="primary" size="small" @click="selectCompressOutputDir">
-                <v-icon icon="mdi-folder-outline" left />
-                选择目录
-              </v-btn>
-            </div>
-          </v-col>
-        </v-row>
-      </template>
+            <v-col cols="12">
+              <div class="label-row">
+                <v-icon icon="mdi-folder-move" color="#059669" size="small" class="mr-1" />
+                <span class="field-label">输出目录</span>
+              </div>
+              <div class="path-display">
+                <span class="path-text">{{ compressOutputDir || '未选择' }}</span>
+                <v-btn
+                  variant="tonal"
+                  color="primary"
+                  size="small"
+                  @click="selectCompressOutputDir"
+                >
+                  <v-icon icon="mdi-folder-outline" left />
+                  选择目录
+                </v-btn>
+              </div>
+            </v-col>
+          </v-row>
+        </v-window-item>
+      </v-window>
 
       <!-- 压缩选项 -->
       <v-row class="mb-4">
         <v-col cols="12">
           <div class="label-row mb-2">
-            <v-icon icon="mdi-tune" color="#f5a623" size="small" class="mr-1" />
+            <v-icon icon="mdi-tune" color="#059669" size="small" class="mr-1" />
             <span class="field-label">压缩选项</span>
           </div>
 
@@ -540,9 +570,7 @@
     </v-alert>
 
     <!-- 底部装饰 -->
-    <div class="footer-decoration">
-      <img src="@/assets/腊肠犬.svg" alt="" class="footer-pet" />
-    </div>
+    <div class="footer-decoration" />
   </v-container>
 </template>
 
@@ -647,6 +675,7 @@ const resetForm = () => {
 // ==================== 视频压缩状态 ====================
 const compressMode = ref<'file' | 'directory'>('file')
 const videoFilePath = ref('')
+const isVideoDragging = ref(false)
 const compressInputDir = ref('')
 const compressOutputDir = ref('')
 const crfValue = ref(23)
@@ -686,6 +715,48 @@ const selectVideoFile = async () => {
   if (file) {
     videoFilePath.value = file
   }
+}
+
+// 拖拽相关函数
+const onVideoDragEnter = () => {
+  isVideoDragging.value = true
+}
+
+const onVideoDragOver = () => {
+  isVideoDragging.value = true
+}
+
+const onVideoDragLeave = (e: DragEvent) => {
+  // 只在真正离开元素时才清除状态
+  if (e.target === e.currentTarget) {
+    isVideoDragging.value = false
+  }
+}
+
+const onVideoDrop = async (e: DragEvent) => {
+  isVideoDragging.value = false
+  const files = e.dataTransfer?.files
+  if (files && files.length > 0) {
+    const file = files[0]
+    // 检查是否是视频文件
+    const videoExtensions = ['.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv', '.webm']
+    const fileName = file.name.toLowerCase()
+    const isVideo = videoExtensions.some(ext => fileName.endsWith(ext))
+
+    if (isVideo) {
+      // 在 Electron 中，file.path 包含完整路径
+      videoFilePath.value = (file as any).path || file.name
+    }
+  }
+}
+
+const clearVideoFile = () => {
+  videoFilePath.value = ''
+}
+
+const getFileName = (path: string) => {
+  const parts = path.split(/[/\\]/)
+  return parts[parts.length - 1]
 }
 
 // 选择压缩输入目录
@@ -777,6 +848,8 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/variables.scss' as *;
+
 .video-container {
   max-width: 900px;
 }
@@ -784,20 +857,9 @@ onUnmounted(() => {
 .page-header {
   display: flex;
   align-items: center;
-  gap: $spacing-xl;
-  padding: $spacing-xl 0;
-  @include fade-in-animation(0.5s);
-}
-
-.page-pet {
-  width: 88px;
-  height: 88px;
-  filter: drop-shadow(0 4px 12px rgba(68, 165, 245, 0.2));
-  transition: all $transition-normal $ease-out;
-
-  &:hover {
-    transform: scale(1.05) rotate(5deg);
-  }
+  gap: $spacing-lg;
+  padding: $spacing-2xl 0 $spacing-xl;
+  @include slide-in('bottom', 0.4s);
 }
 
 .header-text {
@@ -806,58 +868,51 @@ onUnmounted(() => {
 
 .page-title {
   font-size: 28px;
-  font-weight: 600;
-  color: $secondary-color;
+  font-weight: 500;
+  color: $text-primary;
   margin: 0;
-  @include text-on-glass;
+  letter-spacing: -0.02em;
 }
 
 .page-subtitle {
   font-size: 14px;
   color: $text-secondary;
-  margin: $spacing-sm 0 0;
-  @include text-on-glass;
+  margin: $spacing-xs 0 0;
 }
 
-// 卡片间距优化
+// 卡片间距
 :deep(.v-col) {
-  padding: $spacing-md $spacing-sm !important;
+  padding: $spacing-sm !important;
 }
 
 // 字段标签
 .label-row {
   display: flex;
   align-items: center;
-  margin-bottom: $spacing-md;
+  margin-bottom: $spacing-sm;
 }
 
 .field-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: $text-primary;
-  @include text-on-glass;
+  font-size: 13px;
+  font-weight: 500;
+  color: $text-secondary;
 }
 
 // 路径显示
 .path-display {
-  @include glass-input;
+  @include ios-glass-input;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: $spacing-md;
-  transition: all $transition-normal $ease-out;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.9);
-    transform: translateY(-1px);
-  }
+  cursor: pointer;
 }
 
 .path-text {
   flex: 1;
   font-size: 13px;
-  color: $text-secondary;
+  color: $text-primary;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -865,12 +920,12 @@ onUnmounted(() => {
 
 // 大小控制
 .size-control {
-  @include glass-control;
+  @include ios-glass-control;
 
   display: flex;
   flex-direction: column;
-  gap: $spacing-lg;
-  margin-bottom: $spacing-lg;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
 }
 
 .size-slider-group {
@@ -894,8 +949,8 @@ onUnmounted(() => {
 
 // 进度区域
 .progress-section {
-  @include glass-control;
-  margin-bottom: $spacing-lg;
+  @include ios-glass-control;
+  margin-bottom: $spacing-md;
 }
 
 .progress-header {
@@ -907,20 +962,19 @@ onUnmounted(() => {
 
 .progress-title {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   color: $text-primary;
 }
 
 .extract-log {
-  background: #1e1e1e;
-  color: #d4d4d4;
+  background: #1a1a1a;
+  color: #e0e0e0;
   padding: $spacing-md;
-  border-radius: $radius-md;
+  border-radius: $radius-sm;
   max-height: 200px;
   overflow-y: auto;
   font-size: 12px;
-  font-family: 'Monaco', 'Menlo', monospace;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
 }
 
 .extract-log pre {
@@ -936,7 +990,7 @@ onUnmounted(() => {
 }
 
 .alert-title {
-  font-weight: 600;
+  font-weight: 500;
 }
 
 // 选项行
@@ -949,7 +1003,7 @@ onUnmounted(() => {
 
 .option-label {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   color: $text-secondary;
 }
 
@@ -958,59 +1012,95 @@ onUnmounted(() => {
   max-width: 300px;
 
   :deep(.v-field) {
-    @include glass-input;
+    @include input-field;
   }
 }
 
-// 底部装饰
-.footer-decoration {
-  display: flex;
-  justify-content: center;
-  padding: $spacing-2xl 0;
-  @include fade-in-animation(0.5s, 0.8s);
-}
+// 文件拖拽区域
+.file-drop-area {
+  @include input-field;
 
-.footer-pet {
-  width: 64px;
-  height: 64px;
-  opacity: 0.75;
-  transition: all $transition-normal $ease-out;
+  min-height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
+  border: 2px dashed $outline-variant;
 
   &:hover {
-    transform: scale(1.2) rotate(15deg);
-    opacity: 1;
-    filter: drop-shadow(0 4px 16px rgba(68, 165, 245, 0.3));
+    border-color: $primary-color;
+    background: $surface-container-high;
+  }
+
+  &.is-dragging {
+    border-color: $primary-color;
+    background: $primary-container;
+  }
+
+  &.has-file {
+    border-color: $success-color;
+    background: transparent;
+    min-height: auto;
+    padding: $spacing-sm $spacing-md;
   }
 }
 
-// Vuetify 覆盖样式
-:deep(.v-slider) {
-  .v-slider-thumb {
-    transition: transform $transition-fast $ease-out;
+.drop-content {
+  text-align: center;
+  color: $text-secondary;
+}
 
-    &:hover {
-      transform: scale(1.2);
+.file-selected {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  width: 100%;
+}
+
+.file-name {
+  flex: 1;
+  font-size: 13px;
+  color: $text-primary;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Tab 样式
+.compress-tabs {
+  background: $surface-container;
+  border-radius: $radius-lg;
+  padding: $spacing-xs;
+
+  :deep(.v-tab) {
+    border-radius: $radius-md;
+    margin: $spacing-xs;
+    min-width: 0;
+    flex: 1;
+
+    &.v-tab--selected {
+      background: $surface;
+      color: $primary-color;
+    }
+
+    &:hover:not(.v-tab--selected) {
+      background: $surface-container-high;
     }
   }
-}
 
-:deep(.v-btn) {
-  transition: all $transition-normal $ease-out;
-
-  &:active {
-    transform: scale(0.95);
+  :deep(.v-tabs-slider) {
+    display: none;
   }
 }
 
-:deep(.v-checkbox) {
-  .v-selection-control {
-    transition: all $transition-normal $ease-out;
-
-    &:hover {
-      transform: translateX(4px);
-    }
+.compress-window {
+  :deep(.v-window-item) {
+    padding: $spacing-sm 0;
   }
+}
+
+// 分隔线
+:deep(.v-divider) {
+  border-color: $divider;
 }
 </style>

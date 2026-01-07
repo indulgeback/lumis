@@ -1,6 +1,6 @@
 {
     "name": "lumis",
-    "version": "1.0.3",
+    "version": "1.1.0",
     "description": "Lumis - 媒体处理桌面应用",
     "author": {
         "name": "LeviLiu"
@@ -27,6 +27,7 @@
         "pinia": "^2.1.7",
         "vue": "^3.4.21",
         "vue-router": "^4.3.0",
+        "vue3-lottie": "^3.3.1",
         "vuetify": "^3.5.8"
     },
     "devDependencies": {

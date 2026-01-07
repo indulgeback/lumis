@@ -12,9 +12,16 @@
           />
         </div>
 
-        <!-- Logo 图标 - 可爱的柴犬 -->
+        <!-- Logo 动画 -->
         <div class="logo-container">
-          <img src="@/assets/柴犬.svg" alt="Lumis" class="logo-image" />
+          <Vue3Lottie
+            :animation-data="logoAnimation"
+            :loop="true"
+            :auto-play="true"
+            :height="100"
+            :width="100"
+            class="logo-animation"
+          />
         </div>
 
         <!-- 应用名称 -->
@@ -32,6 +39,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import logoAnimation from '@/assets/lottie/logo.json'
 
 const visible = ref(true)
 

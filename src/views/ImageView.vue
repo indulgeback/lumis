@@ -2,7 +2,6 @@
   <v-container class="image-container">
     <!-- 页面头部 -->
     <div class="page-header">
-      <img src="@/assets/布偶猫.svg" alt="" class="page-pet" />
       <div class="header-text">
         <h1 class="page-title">图片处理</h1>
         <p class="page-subtitle">高效压缩图片，节省存储空间</p>
@@ -14,14 +13,14 @@
       title="批量图片压缩"
       subtitle="将图片转换为 WebP 格式并压缩"
       icon="mdi-folder-multiple-image"
-      icon-color="#ab47bc"
-      icon-background="linear-gradient(135deg, #f3e5f5, #e1bee7)"
+      icon-color="#0891b2"
+      icon-background="#cffafe"
     >
       <!-- 目录选择区域 -->
       <v-row class="mb-4">
         <v-col cols="12">
           <div class="label-row">
-            <v-icon icon="mdi-folder-open" color="#f5a623" size="small" class="mr-1" />
+            <v-icon icon="mdi-folder-open" color="#0891b2" size="small" class="mr-1" />
             <span class="field-label">输入目录</span>
           </div>
           <div class="path-display">
@@ -35,7 +34,7 @@
 
         <v-col cols="12">
           <div class="label-row">
-            <v-icon icon="mdi-folder-move" color="#f5a623" size="small" class="mr-1" />
+            <v-icon icon="mdi-folder-move" color="#0891b2" size="small" class="mr-1" />
             <span class="field-label">输出目录</span>
           </div>
           <div class="path-display">
@@ -52,7 +51,7 @@
       <v-row class="mb-4">
         <v-col cols="12">
           <div class="label-row mb-2">
-            <v-icon icon="mdi-tune" color="#f5a623" size="small" class="mr-1" />
+            <v-icon icon="mdi-tune" color="#0891b2" size="small" class="mr-1" />
             <span class="field-label">压缩选项</span>
           </div>
 
@@ -226,9 +225,7 @@
     </v-alert>
 
     <!-- 底部装饰 -->
-    <div class="footer-decoration">
-      <img src="@/assets/三花猫.svg" alt="" class="footer-pet" />
-    </div>
+    <div class="footer-decoration" />
   </v-container>
 </template>
 
@@ -334,6 +331,8 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/styles/variables.scss' as *;
+
 .image-container {
   max-width: 900px;
 }
@@ -341,20 +340,9 @@ onUnmounted(() => {
 .page-header {
   display: flex;
   align-items: center;
-  gap: $spacing-xl;
-  padding: $spacing-xl 0;
-  @include fade-in-animation(0.5s);
-}
-
-.page-pet {
-  width: 88px;
-  height: 88px;
-  filter: drop-shadow(0 4px 12px rgba(171, 71, 188, 0.2));
-  transition: all $transition-normal $ease-out;
-
-  &:hover {
-    transform: scale(1.05) rotate(-5deg);
-  }
+  gap: $spacing-lg;
+  padding: $spacing-2xl 0 $spacing-xl;
+  @include slide-in('bottom', 0.4s);
 }
 
 .header-text {
@@ -363,58 +351,51 @@ onUnmounted(() => {
 
 .page-title {
   font-size: 28px;
-  font-weight: 600;
-  color: $accent-color;
+  font-weight: 500;
+  color: $text-primary;
   margin: 0;
-  @include text-on-glass;
+  letter-spacing: -0.02em;
 }
 
 .page-subtitle {
   font-size: 14px;
   color: $text-secondary;
-  margin: $spacing-sm 0 0;
-  @include text-on-glass;
+  margin: $spacing-xs 0 0;
 }
 
-// 卡片间距优化
+// 卡片间距
 :deep(.v-col) {
-  padding: $spacing-md $spacing-sm !important;
+  padding: $spacing-sm !important;
 }
 
 // 字段标签
 .label-row {
   display: flex;
   align-items: center;
-  margin-bottom: $spacing-md;
+  margin-bottom: $spacing-sm;
 }
 
 .field-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: $text-primary;
-  @include text-on-glass;
+  font-size: 13px;
+  font-weight: 500;
+  color: $text-secondary;
 }
 
 // 路径显示
 .path-display {
-  @include glass-input;
+  @include input-field;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: $spacing-md;
-  transition: all $transition-normal $ease-out;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.9);
-    transform: translateY(-1px);
-  }
+  cursor: pointer;
 }
 
 .path-text {
   flex: 1;
   font-size: 13px;
-  color: $text-secondary;
+  color: $text-primary;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -422,12 +403,12 @@ onUnmounted(() => {
 
 // 大小控制
 .size-control {
-  @include glass-control;
+  @include ios-glass-control;
 
   display: flex;
   flex-direction: column;
-  gap: $spacing-lg;
-  margin-bottom: $spacing-lg;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
 }
 
 .size-slider-group {
@@ -451,8 +432,8 @@ onUnmounted(() => {
 
 // 进度区域
 .progress-section {
-  @include glass-control;
-  margin-bottom: $spacing-lg;
+  @include ios-glass-control;
+  margin-bottom: $spacing-md;
 }
 
 .progress-header {
@@ -464,20 +445,19 @@ onUnmounted(() => {
 
 .progress-title {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   color: $text-primary;
 }
 
 .compress-log {
-  background: #1e1e1e;
-  color: #d4d4d4;
+  background: #1a1a1a;
+  color: #e0e0e0;
   padding: $spacing-md;
-  border-radius: $radius-md;
+  border-radius: $radius-sm;
   max-height: 200px;
   overflow-y: auto;
   font-size: 12px;
-  font-family: 'Monaco', 'Menlo', monospace;
-  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+  font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace;
 }
 
 .compress-log pre {
@@ -493,58 +473,11 @@ onUnmounted(() => {
 }
 
 .alert-title {
-  font-weight: 600;
+  font-weight: 500;
 }
 
-// 底部装饰
-.footer-decoration {
-  display: flex;
-  justify-content: center;
-  padding: $spacing-2xl 0;
-  @include fade-in-animation(0.5s, 0.8s);
-}
-
-.footer-pet {
-  width: 64px;
-  height: 64px;
-  opacity: 0.75;
-  transition: all $transition-normal $ease-out;
-  cursor: pointer;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
-
-  &:hover {
-    transform: scale(1.2) rotate(-15deg);
-    opacity: 1;
-    filter: drop-shadow(0 4px 16px rgba(171, 71, 188, 0.3));
-  }
-}
-
-// Vuetify 覆盖样式
-:deep(.v-slider) {
-  .v-slider-thumb {
-    transition: transform $transition-fast $ease-out;
-
-    &:hover {
-      transform: scale(1.2);
-    }
-  }
-}
-
-:deep(.v-btn) {
-  transition: all $transition-normal $ease-out;
-
-  &:active {
-    transform: scale(0.95);
-  }
-}
-
-:deep(.v-checkbox) {
-  .v-selection-control {
-    transition: all $transition-normal $ease-out;
-
-    &:hover {
-      transform: translateX(4px);
-    }
-  }
+// 分隔线
+:deep(.v-divider) {
+  border-color: $divider;
 }
 </style>
